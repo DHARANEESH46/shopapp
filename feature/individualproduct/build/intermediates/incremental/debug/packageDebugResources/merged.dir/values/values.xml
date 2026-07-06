@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="description_product">Description Product</string>
+    <string name="detail_product">Detail Product</string>
+    <string name="see_all_review">See All Review</string>
+</resources>

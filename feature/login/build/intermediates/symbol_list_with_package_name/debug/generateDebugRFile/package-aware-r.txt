@@ -1,0 +1,10 @@
+com.example.shopapp.feature.login
+string enter_your_password
+string enter_your_username
+string forgot_password
+string password
+string please_enter_your_credentials_to_login
+string sign_in
+string sign_up
+string username
+string welcome_back_to_shop_app

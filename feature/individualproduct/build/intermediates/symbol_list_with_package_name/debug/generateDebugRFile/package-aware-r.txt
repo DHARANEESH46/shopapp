@@ -1,0 +1,4 @@
+com.example.shopapp.feature.individualproduct
+string description_product
+string detail_product
+string see_all_review
