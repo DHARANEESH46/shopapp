@@ -32,8 +32,6 @@ class HomeViewModel @Inject constructor(
 
     private var allProducts: List<Product> = emptyList()
 
-    private val userId: Int get() = authRepository.getCurrentUser()?.id ?: 0
-
     private val _cartCount = MutableStateFlow(0)
     val cartCount: StateFlow<Int> = _cartCount.asStateFlow()
 
@@ -72,8 +70,11 @@ class HomeViewModel @Inject constructor(
 
     private fun observeCartCount() {
         viewModelScope.launch {
-            cartRepository.getCartCount(userId).collect {
-                _cartCount.value = it
+            authRepository.getCurrentUserFlow().collect { user ->
+                val uid = user?.id ?: return@collect
+                cartRepository.getCartCount(uid).collect {
+                    _cartCount.value = it
+                }
             }
         }
     }

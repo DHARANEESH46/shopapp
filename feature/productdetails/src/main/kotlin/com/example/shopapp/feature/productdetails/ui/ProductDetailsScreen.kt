@@ -75,7 +75,7 @@ fun ProductDetailsScreen(
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.back),
                             tint = Color(0xFF1A1A2E)
                         )
                     }
@@ -237,7 +237,7 @@ private fun ProductGridCard(
 
                     Icon(
                         imageVector = Icons.Default.MoreVert,
-                        contentDescription = "More",
+                        contentDescription = stringResource(R.string.more),
                         tint = Color.Gray,
                         modifier = Modifier.size(18.dp)
                     )

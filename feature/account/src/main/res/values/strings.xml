@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="my_account">My Account</string>
+    <string name="profile_picture">Profile Picture</string>
+    <string name="logout">Logout</string>
+    <string name="email">Email</string>
+    <string name="username">Username</string>
+</resources>

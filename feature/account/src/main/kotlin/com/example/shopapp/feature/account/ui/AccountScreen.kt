@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,6 +39,7 @@ import com.example.shopapp.core.designsystem.theme.Primary
 import com.example.shopapp.core.designsystem.theme.TextPrimary
 import com.example.shopapp.core.designsystem.theme.TextSecondary
 import com.example.shopapp.core.domain.model.User
+import com.example.shopapp.feature.account.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,7 +54,7 @@ fun AccountScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "My Account",
+                        text = stringResource(R.string.my_account),
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
                         color = TextPrimary
@@ -77,7 +79,7 @@ fun AccountScreen(
             // Profile Image
             AsyncImage(
                 model = user?.image,
-                contentDescription = "Profile Picture",
+                contentDescription = stringResource(R.string.profile_picture),
                 modifier = Modifier
                     .size(100.dp)
                     .clip(CircleShape)
@@ -112,7 +114,7 @@ fun AccountScreen(
 
             // Logout Button
             ShopButton(
-                text = "Logout",
+                text = stringResource(R.string.logout),
                 onClick = {
                     viewModel.logout()
                     onLogout()
@@ -134,10 +136,10 @@ fun UserInfoCard(user: User) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            InfoRow(label = "Email", value = user.email)
+            InfoRow(label = stringResource(R.string.email), value = user.email)
             HorizontalDivider(color = Divider, modifier = Modifier.padding(vertical = 12.dp))
             HorizontalDivider(color = Divider, modifier = Modifier.padding(vertical = 12.dp))
-            InfoRow(label = "Username", value = user.username)
+            InfoRow(label = stringResource(R.string.username), value = user.username)
         }
     }
 }

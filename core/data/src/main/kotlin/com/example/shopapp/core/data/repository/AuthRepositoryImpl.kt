@@ -6,7 +6,6 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.example.shopapp.core.database.dao.CartDao
 import com.example.shopapp.core.domain.model.AuthState
 import com.example.shopapp.core.domain.model.User
 import com.example.shopapp.core.domain.repository.AuthRepository
@@ -25,7 +24,6 @@ private val Context.dataStore by preferencesDataStore(name = "auth_prefs")
 
 class AuthRepositoryImpl @Inject constructor(
     private val shopApi: ShopApi,
-    private val cartDao: CartDao,
     @ApplicationContext private val context: Context
 ) : AuthRepository {
 
@@ -63,9 +61,6 @@ class AuthRepositoryImpl @Inject constructor(
     }
 
     override suspend fun logout() {
-        val userId = getCurrentUser()?.id ?: 0
-
-        cartDao.clearCartForUser(userId)
 
         context.dataStore.edit { prefs ->
             prefs[IS_LOGGED_IN] = false

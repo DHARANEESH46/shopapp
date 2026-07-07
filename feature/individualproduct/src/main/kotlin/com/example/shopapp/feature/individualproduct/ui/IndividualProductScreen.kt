@@ -99,7 +99,7 @@ fun IndividualProductScreen(
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.back),
                             tint = Color(0xFF1A1A2E)
                         )
                     }
@@ -108,7 +108,7 @@ fun IndividualProductScreen(
                     IconButton(onClick = { }) {
                         Icon(
                             imageVector = Icons.Filled.Share,
-                            contentDescription = "Share",
+                            contentDescription = stringResource(R.string.share),
                             tint = Color(0xFF1A1A2E)
                         )
                     }
@@ -117,7 +117,7 @@ fun IndividualProductScreen(
                         IconButton(onClick = { }) {
                             Icon(
                                 imageVector = Icons.Filled.ShoppingCart,
-                                contentDescription = "Cart",
+                                contentDescription = stringResource(R.string.cart),
                                 tint = Color(0xFFE53935)
                             )
                         }
@@ -170,13 +170,13 @@ fun IndividualProductScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.FavoriteBorder,
-                            contentDescription = "Wishlist",
+                            contentDescription = stringResource(R.string.wishlist),
                             tint = Color(0xFFE53935),
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "Wishlist",
+                            text = stringResource(id=R.string.wishlist),
                             color = Color(0xFFE53935),
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 14.sp
@@ -202,7 +202,7 @@ fun IndividualProductScreen(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "Add to Cart",
+                            text = stringResource(R.string.add_to_cart),
                             color = Color.White,
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 14.sp
@@ -284,7 +284,7 @@ fun AddToCartDialog(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Add to Cart",
+                    text = stringResource(id=R.string.add_to_cart),
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp,
                     color = Color(0xFF1A1A2E)
@@ -292,7 +292,7 @@ fun AddToCartDialog(
                 IconButton(onClick = onDismiss) {
                     Icon(
                         imageVector = Icons.Filled.Close,
-                        contentDescription = "Close",
+                        contentDescription = stringResource(R.string.close),
                         tint = Color.Gray
                     )
                 }
@@ -308,7 +308,7 @@ fun AddToCartDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Quantity",
+                        text = stringResource(R.string.quantity),
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Medium,
                         color = Color(0xFF1A1A2E)
@@ -369,7 +369,7 @@ fun AddToCartDialog(
 
                 // ── Total Price ──
                 Text(
-                    text = "Total",
+                    text = stringResource(R.string.total),
                     fontSize = 13.sp,
                     color = Color.Gray
                 )
@@ -395,7 +395,7 @@ fun AddToCartDialog(
                     )
                 ) {
                     Text(
-                        text = "Add to Cart",
+                        text =stringResource(id=R.string.add_to_cart),
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
                         fontSize = 15.sp
@@ -532,7 +532,7 @@ private fun IndividualProductContent(
 
             if (product.reviews.isEmpty()) {
                 Text(
-                    text = "No reviews yet",
+                    text = stringResource(R.string.no_reviews_yet),
                     fontSize = 14.sp,
                     color = Color.Gray
                 )

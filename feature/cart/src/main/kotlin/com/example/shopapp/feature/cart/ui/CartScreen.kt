@@ -35,12 +35,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.shopapp.core.domain.model.CartItem
+import com.example.shopapp.feature.cart.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,7 +58,7 @@ fun CartScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "My Cart",
+                        text = stringResource(R.string.my_cart),
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
                         color = Color(0xFF1A1A2E)
@@ -66,7 +68,7 @@ fun CartScreen(
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.back),
                             tint = Color(0xFF1A1A2E)
                         )
                     }
@@ -93,7 +95,7 @@ fun CartScreen(
                     ) {
                         Column {
                             Text(
-                                text = "Total Price",
+                                text = stringResource(R.string.total_price),
                                 fontSize = 13.sp,
                                 color = Color.Gray
                             )
@@ -123,7 +125,7 @@ fun CartScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Your cart is empty",
+                    text = stringResource(R.string.your_cart_is_empty),
                     color = Color.Gray,
                     fontSize = 16.sp
                 )
@@ -189,7 +191,7 @@ fun CartItemCard(
                 // Quantity shown clearly
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "Qty:",
+                        text = stringResource(R.string.qty),
                         fontSize = 12.sp,
                         color = Color.Gray
                     )
@@ -220,7 +222,7 @@ fun CartItemCard(
             IconButton(onClick = onRemove) {
                 Icon(
                     imageVector = Icons.Filled.Delete,
-                    contentDescription = "Remove",
+                    contentDescription = stringResource(R.string.remove),
                     tint = Color.Gray
                 )
             }

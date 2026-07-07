@@ -8,4 +8,7 @@
     <string name="up_to_50_off">Up to 50% Off!</string>
     <string name="on_selected_products">On selected products</string>
     <string name="categories">Categories</string>
+    <string name="notifications">Notifications</string>
+    <string name="cart">Cart</string>
+    <string name="search">Search</string>
 </resources>

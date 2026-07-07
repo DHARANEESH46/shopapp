@@ -1,2 +1,0 @@
-com.example.shopapp.feature.productdetails
-string all_products

@@ -86,7 +86,7 @@ fun HomeScreen(
                     IconButton(onClick = { }) {
                         Icon(
                             painter = painterResource(R.drawable.ic_popup_remainder),
-                            contentDescription = "Notifications",
+                            contentDescription = stringResource(R.string.notifications),
                             tint = Color(0xFF1A1A2E)
                         )
                     }
@@ -100,7 +100,7 @@ fun HomeScreen(
                         IconButton(onClick = onCartClick) {
                             Icon(
                                 imageVector = Icons.Filled.ShoppingCart,
-                                contentDescription = "Cart",
+                                contentDescription = stringResource(R.string.cart),
                                 tint = Color(0xFF1A1A2E)
                             )
                         }
@@ -145,7 +145,7 @@ fun HomeScreen(
                 trailingIcon = {
                     Icon(
                         painter = painterResource(R.drawable.ic_menu_search),
-                        contentDescription = "Search",
+                        contentDescription = stringResource(R.string.search),
                         tint = Color(0xFF1A1A2E)
                     )
                 },

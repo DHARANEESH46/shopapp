@@ -18,8 +18,6 @@ class CartViewModel @Inject constructor(
     private val authRepository: AuthRepository
 ) : ViewModel() {
 
-    private val userId: Int get() = authRepository.getCurrentUser()?.id ?: 0
-
     private val _cartItems = MutableStateFlow<List<CartItem>>(emptyList())
     val cartItems: StateFlow<List<CartItem>> = _cartItems.asStateFlow()
 
@@ -28,16 +26,20 @@ class CartViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            cartRepository.getCartItems(userId).collect { items ->
-                _cartItems.value = items
-                _totalPrice.value = items.sumOf { it.productPrice * it.quantity }
+            authRepository.getCurrentUserFlow().collect { user ->
+                val uid = user?.id ?: return@collect
+                cartRepository.getCartItems(uid).collect { items ->
+                    _cartItems.value = items
+                    _totalPrice.value = items.sumOf { it.productPrice * it.quantity }
+                }
             }
         }
     }
 
     fun removeFromCart(productId: Int) {
         viewModelScope.launch {
-            cartRepository.removeFromCart(userId, productId)
+            val uid = authRepository.getCurrentUser()?.id ?: return@launch
+            cartRepository.removeFromCart(uid, productId)
         }
     }
 }

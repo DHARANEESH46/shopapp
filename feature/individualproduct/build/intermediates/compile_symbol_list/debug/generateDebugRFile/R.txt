@@ -1,3 +1,0 @@
-int string description_product 0x0
-int string detail_product 0x0
-int string see_all_review 0x0

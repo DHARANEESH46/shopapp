@@ -117,9 +117,9 @@ fun LoginScreen(
                             else
                                 Icons.Default.VisibilityOff,
                             contentDescription = if (passwordVisible)
-                                "Hide password"
+                                stringResource(R.string.hide_password)
                             else
-                                "Show password",
+                                stringResource(R.string.show_password),
                             tint = TextSecondary
                         )
                     }
