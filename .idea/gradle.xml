@@ -37,6 +37,7 @@
             <option value="$PROJECT_DIR$/feature/individualproduct" />
             <option value="$PROJECT_DIR$/feature/login" />
             <option value="$PROJECT_DIR$/feature/productdetails" />
+            <option value="$PROJECT_DIR$/feature/wishlist" />
           </set>
         </option>
       </GradleProjectSettings>

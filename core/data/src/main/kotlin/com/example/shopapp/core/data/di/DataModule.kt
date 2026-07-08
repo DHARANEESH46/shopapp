@@ -3,9 +3,11 @@ package com.example.shopapp.core.data.di
 import com.example.shopapp.core.data.repository.AuthRepositoryImpl
 import com.example.shopapp.core.data.repository.CartRepositoryImpl
 import com.example.shopapp.core.data.repository.ProductRepositoryImpl
+import com.example.shopapp.core.data.repository.WishlistRepositoryImpl
 import com.example.shopapp.core.domain.repository.AuthRepository
 import com.example.shopapp.core.domain.repository.CartRepository
 import com.example.shopapp.core.domain.repository.ProductRepository
+import com.example.shopapp.core.domain.repository.WishlistRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -24,4 +26,7 @@ abstract class DataModule {
 
     @Binds @Singleton
     abstract fun bindCartRepository(impl: CartRepositoryImpl): CartRepository
+
+    @Binds @Singleton
+    abstract fun bindWishlistRepository(impl: WishlistRepositoryImpl): WishlistRepository
 }

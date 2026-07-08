@@ -20,6 +20,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.ShoppingCart
@@ -72,6 +73,7 @@ fun IndividualProductScreen(
     val snackbarMessage by viewModel.snackbarMessage.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    val isInWishlist by viewModel.isInWishlist.collectAsState()
 
     var showCartDialog by remember { mutableStateOf(false) }
 
@@ -158,26 +160,29 @@ fun IndividualProductScreen(
                 ) {
                     // Wishlist button
                     Button(
-                        onClick = { },
+                        onClick = {
+                            val product = (productState as? ResultState.Success<Product>)?.data ?: return@Button
+                            viewModel.toggleWishlist(product)
+                        },
                         modifier = Modifier
                             .weight(1f)
                             .height(50.dp),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.White
+                            containerColor = if (isInWishlist) Color(0xFFE53935) else Color.White
                         ),
                         border = BorderStroke(1.dp, Color(0xFFE53935))
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.FavoriteBorder,
-                            contentDescription = stringResource(R.string.wishlist),
-                            tint = Color(0xFFE53935),
+                            imageVector = if (isInWishlist) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                            contentDescription = "Wishlist",
+                            tint = if (isInWishlist) Color.White else Color(0xFFE53935),
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = stringResource(id=R.string.wishlist),
-                            color = Color(0xFFE53935),
+                            text = if (isInWishlist) "Added" else "Wishlist",
+                            color = if (isInWishlist) Color.White else Color(0xFFE53935),
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 14.sp
                         )

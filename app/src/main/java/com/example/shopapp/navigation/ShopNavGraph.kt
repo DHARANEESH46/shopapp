@@ -38,6 +38,7 @@ import com.example.shopapp.feature.individualproduct.ui.IndividualProductScreen
 import com.example.shopapp.feature.login.ui.LoginScreen
 import com.example.shopapp.feature.productdetails.ui.ProductDetailsScreen
 import com.example.shopapp.feature.cart.ui.CartScreen
+import com.example.shopapp.feature.wishlist.ui.WishlistScreen
 
 object Routes {
     const val LOGIN = "login"
@@ -121,9 +122,12 @@ fun ShopNavGraph(
             }
 
             composable(route = Routes.WISHLIST) {
-                PlaceholderScreen(title = "Wishlist")
+                WishlistScreen(
+                    onProductClick = { productId ->
+                        navController.navigate(Routes.individualProduct(productId))
+                    }
+                )
             }
-
             composable(route = Routes.ORDER) {
                 PlaceholderScreen(title = "Orders")
             }

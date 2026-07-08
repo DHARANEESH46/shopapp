@@ -48,6 +48,7 @@ dependencies {
     implementation(project(":feature:individualproduct"))
     implementation(project(":feature:account"))
     implementation(project(":feature:cart"))
+    implementation(project(":feature:wishlist"))
 
     // Core modules
     implementation(project(":core:data"))
