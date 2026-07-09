@@ -10,16 +10,18 @@ import com.example.shopapp.core.domain.model.WishlistItem
 import com.example.shopapp.core.domain.repository.AuthRepository
 import com.example.shopapp.core.domain.repository.CartRepository
 import com.example.shopapp.core.domain.repository.WishlistRepository
+import com.example.shopapp.core.domain.usecase.GetProductByIdUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class IndividualProductViewModel @Inject constructor(
-    private val getProductByIdUseCase: com.example.shopapp.core.domain.usecase.GetProductByIdUseCase,
+    private val getProductByIdUseCase: GetProductByIdUseCase,
     private val cartRepository: CartRepository,
     private val wishlistRepository: WishlistRepository,
     private val authRepository: AuthRepository,
@@ -28,17 +30,8 @@ class IndividualProductViewModel @Inject constructor(
 
     private val productId: Int = checkNotNull(savedStateHandle["productId"])
 
-    private val _productState = MutableStateFlow<ResultState<Product>>(ResultState.Loading)
-    val productState: StateFlow<ResultState<Product>> = _productState.asStateFlow()
-
-    private val _cartCount = MutableStateFlow(0)
-    val cartCount: StateFlow<Int> = _cartCount.asStateFlow()
-
-    private val _isInWishlist = MutableStateFlow(false)
-    val isInWishlist: StateFlow<Boolean> = _isInWishlist.asStateFlow()
-
-    private val _snackbarMessage = MutableStateFlow<String?>(null)
-    val snackbarMessage: StateFlow<String?> = _snackbarMessage.asStateFlow()
+    private val _uiState = MutableStateFlow(IndividualProductUiState())
+    val uiState: StateFlow<IndividualProductUiState> = _uiState.asStateFlow()
 
     init {
         loadProduct()
@@ -48,8 +41,12 @@ class IndividualProductViewModel @Inject constructor(
 
     private fun loadProduct() {
         viewModelScope.launch {
-            getProductByIdUseCase(productId).collect {
-                _productState.value = it
+            getProductByIdUseCase(productId).collect { state ->
+                when (state) {
+                    is ResultState.Loading -> _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+                    is ResultState.Success -> _uiState.update { it.copy(isLoading = false, product = state.data) }
+                    is ResultState.Error -> _uiState.update { it.copy(isLoading = false, errorMessage = state.message) }
+                }
             }
         }
     }
@@ -58,8 +55,8 @@ class IndividualProductViewModel @Inject constructor(
         viewModelScope.launch {
             authRepository.getCurrentUserFlow().collect { user ->
                 val uid = user?.id ?: return@collect
-                cartRepository.getCartCount(uid).collect {
-                    _cartCount.value = it
+                cartRepository.getCartCount(uid).collect { count ->
+                    _uiState.update { it.copy(cartCount = count) }
                 }
             }
         }
@@ -69,8 +66,8 @@ class IndividualProductViewModel @Inject constructor(
         viewModelScope.launch {
             authRepository.getCurrentUserFlow().collect { user ->
                 val uid = user?.id ?: return@collect
-                wishlistRepository.isInWishlist(uid, productId).collect {
-                    _isInWishlist.value = it
+                wishlistRepository.isInWishlist(uid, productId).collect { inWishlist ->
+                    _uiState.update { it.copy(isInWishlist = inWishlist) }
                 }
             }
         }
@@ -79,9 +76,9 @@ class IndividualProductViewModel @Inject constructor(
     fun toggleWishlist(product: Product) {
         viewModelScope.launch {
             val uid = authRepository.getCurrentUser()?.id ?: return@launch
-            if (_isInWishlist.value) {
+            if (_uiState.value.isInWishlist) {
                 wishlistRepository.removeFromWishlist(uid, product.id)
-                _snackbarMessage.value = "${product.title} removed from wishlist"
+                _uiState.update { it.copy(snackbarMessage = "${product.title} removed from wishlist") }
             } else {
                 wishlistRepository.addToWishlist(
                     WishlistItem(
@@ -92,7 +89,7 @@ class IndividualProductViewModel @Inject constructor(
                         productThumbnail = product.thumbnail
                     )
                 )
-                _snackbarMessage.value = "${product.title} added to wishlist!"
+                _uiState.update { it.copy(snackbarMessage = "${product.title} added to wishlist!") }
             }
         }
     }
@@ -110,11 +107,11 @@ class IndividualProductViewModel @Inject constructor(
                     quantity = quantity
                 )
             )
-            _snackbarMessage.value = "${product.title} added to cart!"
+            _uiState.update { it.copy(snackbarMessage = "${product.title} added to cart!") }
         }
     }
 
     fun clearSnackbar() {
-        _snackbarMessage.value = null
+        _uiState.update { it.copy(snackbarMessage = null) }
     }
 }

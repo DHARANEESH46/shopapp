@@ -47,7 +47,7 @@ fun AccountScreen(
     onLogout: () -> Unit,
     viewModel: AccountViewModel = hiltViewModel()
 ) {
-    val user by viewModel.user.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -78,7 +78,7 @@ fun AccountScreen(
 
             // Profile Image
             AsyncImage(
-                model = user?.image,
+                model = uiState.user?.image,
                 contentDescription = stringResource(R.string.profile_picture),
                 modifier = Modifier
                     .size(100.dp)
@@ -90,7 +90,7 @@ fun AccountScreen(
 
             // Full Name
             Text(
-                text = "${user?.firstName} ${user?.lastName}",
+                text = "${uiState.user?.firstName} ${uiState.user?.lastName}",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextPrimary
@@ -100,7 +100,7 @@ fun AccountScreen(
 
             // Username
             Text(
-                text = "@${user?.username}",
+                text = "@${uiState.user?.username}",
                 fontSize = 14.sp,
                 color = Primary
             )
@@ -108,7 +108,7 @@ fun AccountScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // Info Card
-            user?.let { UserInfoCard(user = it) }
+            uiState.user?.let { UserInfoCard(user = it) }
 
             Spacer(modifier = Modifier.weight(1f))
 

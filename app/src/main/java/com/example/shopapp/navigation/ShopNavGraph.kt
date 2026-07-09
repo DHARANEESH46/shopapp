@@ -64,8 +64,8 @@ fun ShopNavGraph(
     val currentRoute = navBackStackEntry?.destination?.route
 
     val accountViewModel: AccountViewModel = hiltViewModel()
-    val user by accountViewModel.user.collectAsState()
-    val userImageUrl = user?.image ?: ""
+    val accountUiState by accountViewModel.uiState.collectAsState()
+    val userImageUrl = accountUiState.user?.image ?: ""
 
     Scaffold(
         bottomBar = {

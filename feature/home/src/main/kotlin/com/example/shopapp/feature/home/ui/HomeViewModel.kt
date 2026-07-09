@@ -11,6 +11,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -21,19 +22,10 @@ class HomeViewModel @Inject constructor(
     private val authRepository: AuthRepository
 ) : ViewModel() {
 
-    private val _productsState = MutableStateFlow<ResultState<List<Product>>>(ResultState.Loading)
-    val productsState: StateFlow<ResultState<List<Product>>> = _productsState.asStateFlow()
-
-    private val _searchQuery = MutableStateFlow("")
-    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
-
-    private val _filteredProducts = MutableStateFlow<List<Product>>(emptyList())
-    val filteredProducts: StateFlow<List<Product>> = _filteredProducts.asStateFlow()
+    private val _uiState = MutableStateFlow(HomeUiState())
+    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     private var allProducts: List<Product> = emptyList()
-
-    private val _cartCount = MutableStateFlow(0)
-    val cartCount: StateFlow<Int> = _cartCount.asStateFlow()
 
     init {
         loadProducts()
@@ -43,28 +35,38 @@ class HomeViewModel @Inject constructor(
     fun loadProducts() {
         viewModelScope.launch {
             getProductsUseCase().collect { state ->
-                _productsState.value = state
-                if (state is ResultState.Success) {
-                    allProducts = state.data
-                    filterProducts(_searchQuery.value)
+                when (state) {
+                    is ResultState.Loading -> _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+                    is ResultState.Success -> {
+                        allProducts = state.data
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                products = state.data,
+                                filteredProducts = applyFilter(state.data, it.searchQuery)
+                            )
+                        }
+                    }
+                    is ResultState.Error -> _uiState.update { it.copy(isLoading = false, errorMessage = state.message) }
                 }
             }
         }
     }
 
     fun onSearchQueryChange(query: String) {
-        _searchQuery.value = query
-        filterProducts(query)
+        _uiState.update {
+            it.copy(
+                searchQuery = query,
+                filteredProducts = applyFilter(allProducts, query)
+            )
+        }
     }
 
-    private fun filterProducts(query: String) {
-        _filteredProducts.value = if (query.isBlank()) {
-            allProducts
-        } else {
-            allProducts.filter {
-                it.title.contains(query, ignoreCase = true) ||
-                        it.category.contains(query, ignoreCase = true)
-            }
+    private fun applyFilter(products: List<Product>, query: String): List<Product> {
+        return if (query.isBlank()) products
+        else products.filter {
+            it.title.contains(query, ignoreCase = true) ||
+                    it.category.contains(query, ignoreCase = true)
         }
     }
 
@@ -72,11 +74,10 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             authRepository.getCurrentUserFlow().collect { user ->
                 val uid = user?.id ?: return@collect
-                cartRepository.getCartCount(uid).collect {
-                    _cartCount.value = it
+                cartRepository.getCartCount(uid).collect { count ->
+                    _uiState.update { it.copy(cartCount = count) }
                 }
             }
         }
     }
-
 }

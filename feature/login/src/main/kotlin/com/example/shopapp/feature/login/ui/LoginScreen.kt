@@ -34,7 +34,6 @@ import com.example.shopapp.core.designsystem.component.ShopButton
 import com.example.shopapp.core.designsystem.component.ShopTextField
 import com.example.shopapp.core.designsystem.theme.Primary
 import com.example.shopapp.core.designsystem.theme.TextSecondary
-import com.example.shopapp.core.domain.model.AuthState
 import com.example.shopapp.feature.login.R
 
 @Composable
@@ -42,27 +41,19 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit,
     viewModel: LoginViewModel = hiltViewModel()
 ) {
-    val authState by viewModel.authState.collectAsState()
-    val username by viewModel.username.collectAsState()
-    val password by viewModel.password.collectAsState()
-    val passwordVisible by viewModel.passwordVisible.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    val isFormFilled = username.isNotBlank() && password.isNotBlank()
+    val isFormFilled = uiState.username.isNotBlank() && uiState.password.isNotBlank()
 
-    LaunchedEffect(authState) {
-        when (authState) {
-            is AuthState.Success -> {
-                onLoginSuccess()
-                viewModel.resetState()
-            }
-            is AuthState.Error -> {
-                snackbarHostState.showSnackbar(
-                    (authState as AuthState.Error).message
-                )
-                viewModel.resetState()
-            }
-            else -> {}
+    LaunchedEffect(uiState.isLoginSuccess, uiState.errorMessage) {
+        if (uiState.isLoginSuccess) {
+            onLoginSuccess()
+            viewModel.resetState()
+        }
+        uiState.errorMessage?.let { message ->
+            snackbarHostState.showSnackbar(message)
+            viewModel.resetState()
         }
     }
 
@@ -92,7 +83,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(40.dp))
 
             ShopTextField(
-                value = username,
+                value = uiState.username,
                 onValueChange = viewModel::onUsernameChange,
                 label = stringResource(R.string.username),
                 placeholder = stringResource(R.string.enter_your_username)
@@ -101,22 +92,22 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             ShopTextField(
-                value = password,
+                value = uiState.password,
                 onValueChange = viewModel::onPasswordChange,
                 label = stringResource(R.string.password),
                 placeholder = stringResource(R.string.enter_your_password),
-                visualTransformation = if (passwordVisible)
+                visualTransformation = if (uiState.passwordVisible)
                     VisualTransformation.None
                 else
                     PasswordVisualTransformation(),
                 trailingIcon = {
                     IconButton(onClick = viewModel::togglePasswordVisibility) {
                         Icon(
-                            imageVector = if (passwordVisible)
+                            imageVector = if (uiState.passwordVisible)
                                 Icons.Default.Visibility
                             else
                                 Icons.Default.VisibilityOff,
-                            contentDescription = if (passwordVisible)
+                            contentDescription = if (uiState.passwordVisible)
                                 stringResource(R.string.hide_password)
                             else
                                 stringResource(R.string.show_password),
@@ -132,9 +123,8 @@ fun LoginScreen(
                 text = stringResource(R.string.sign_in),
                 onClick = { viewModel.login() },
                 enabled = isFormFilled,
-                isLoading = authState is AuthState.Loading
+                isLoading = uiState.isLoading
             )
-
             Spacer(modifier = Modifier.height(24.dp))
 
             Row(

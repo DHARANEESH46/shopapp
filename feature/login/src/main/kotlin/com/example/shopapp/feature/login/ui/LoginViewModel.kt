@@ -8,6 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -16,42 +17,38 @@ class LoginViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase
 ) : ViewModel() {
 
-    private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
-    val authState: StateFlow<AuthState> = _authState.asStateFlow()
-
-    private val _username = MutableStateFlow("")
-    val username: StateFlow<String> = _username.asStateFlow()
-
-    private val _password = MutableStateFlow("")
-    val password: StateFlow<String> = _password.asStateFlow()
-
-    private val _passwordVisible = MutableStateFlow(false)
-    val passwordVisible: StateFlow<Boolean> = _passwordVisible.asStateFlow()
+    private val _uiState = MutableStateFlow(LoginUiState())
+    val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
     fun onUsernameChange(value: String) {
-        _username.value = value
+        _uiState.update { it.copy(username = value) }
     }
 
     fun onPasswordChange(value: String) {
-        _password.value = value
+        _uiState.update { it.copy(password = value) }
     }
 
     fun togglePasswordVisibility() {
-        _passwordVisible.value = !_passwordVisible.value
+        _uiState.update { it.copy(passwordVisible = !it.passwordVisible) }
     }
 
     fun login() {
         viewModelScope.launch {
             loginUseCase(
-                username = _username.value,
-                password = _password.value
+                username = _uiState.value.username,
+                password = _uiState.value.password
             ).collect { state ->
-                _authState.value = state
+                when (state) {
+                    is AuthState.Loading -> _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+                    is AuthState.Success -> _uiState.update { it.copy(isLoading = false, isLoginSuccess = true) }
+                    is AuthState.Error -> _uiState.update { it.copy(isLoading = false, errorMessage = state.message) }
+                    is AuthState.Idle -> _uiState.update { it.copy(isLoading = false) }
+                }
             }
         }
     }
 
     fun resetState() {
-        _authState.value = AuthState.Idle
+        _uiState.update { it.copy(isLoginSuccess = false, errorMessage = null) }
     }
 }

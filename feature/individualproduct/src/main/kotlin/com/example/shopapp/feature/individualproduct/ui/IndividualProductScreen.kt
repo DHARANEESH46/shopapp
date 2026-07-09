@@ -58,7 +58,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.shopapp.core.domain.model.Product
-import com.example.shopapp.core.domain.model.ResultState
 import com.example.shopapp.core.domain.model.Review
 import com.example.shopapp.feature.individualproduct.R
 
@@ -68,18 +67,14 @@ fun IndividualProductScreen(
     onBackClick: () -> Unit,
     viewModel: IndividualProductViewModel = hiltViewModel()
 ) {
-    val productState by viewModel.productState.collectAsState()
-    val cartCount by viewModel.cartCount.collectAsState()
-    val snackbarMessage by viewModel.snackbarMessage.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    val isInWishlist by viewModel.isInWishlist.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
     var showCartDialog by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
 
-    LaunchedEffect(snackbarMessage) {
-        snackbarMessage?.let {
+    LaunchedEffect(uiState.snackbarMessage) {
+        uiState.snackbarMessage?.let {
             snackbarHostState.showSnackbar(it)
             viewModel.clearSnackbar()
         }
@@ -123,7 +118,7 @@ fun IndividualProductScreen(
                                 tint = Color(0xFFE53935)
                             )
                         }
-                        if (cartCount > 0) {
+                        if (uiState.cartCount > 0) {
                             Box(
                                 modifier = Modifier
                                     .size(16.dp)
@@ -132,7 +127,7 @@ fun IndividualProductScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = "$cartCount",
+                                    text = "${uiState.cartCount}",
                                     color = Color.White,
                                     fontSize = 9.sp,
                                     fontWeight = FontWeight.Bold
@@ -148,9 +143,8 @@ fun IndividualProductScreen(
         },
         containerColor = Color.White,
         bottomBar = {
-
-            if (productState is ResultState.Success) {
-                val product = (productState as ResultState.Success<Product>).data
+            val product = uiState.product
+            if (product != null) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -160,29 +154,26 @@ fun IndividualProductScreen(
                 ) {
                     // Wishlist button
                     Button(
-                        onClick = {
-                            val product = (productState as? ResultState.Success<Product>)?.data ?: return@Button
-                            viewModel.toggleWishlist(product)
-                        },
+                        onClick = { viewModel.toggleWishlist(product) },
                         modifier = Modifier
                             .weight(1f)
                             .height(50.dp),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isInWishlist) Color(0xFFE53935) else Color.White
+                            containerColor = if (uiState.isInWishlist) Color(0xFFE53935) else Color.White
                         ),
                         border = BorderStroke(1.dp, Color(0xFFE53935))
                     ) {
                         Icon(
-                            imageVector = if (isInWishlist) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                            imageVector = if (uiState.isInWishlist) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                             contentDescription = "Wishlist",
-                            tint = if (isInWishlist) Color.White else Color(0xFFE53935),
+                            tint = if (uiState.isInWishlist) Color.White else Color(0xFFE53935),
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = if (isInWishlist) "Added" else "Wishlist",
-                            color = if (isInWishlist) Color.White else Color(0xFFE53935),
+                            text = if (uiState.isInWishlist) "Added" else "Wishlist",
+                            color = if (uiState.isInWishlist) Color.White else Color(0xFFE53935),
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 14.sp
                         )
@@ -215,7 +206,6 @@ fun IndividualProductScreen(
                     }
                 }
 
-                // Quantity dialog — shown on top when Add to Cart is pressed
                 if (showCartDialog) {
                     AddToCartDialog(
                         productName = product.title,
@@ -230,8 +220,8 @@ fun IndividualProductScreen(
             }
         }
     ) { paddingValues ->
-        when (productState) {
-            is ResultState.Loading -> {
+        when {
+            uiState.isLoading -> {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -242,7 +232,8 @@ fun IndividualProductScreen(
                 }
             }
 
-            is ResultState.Error -> {
+            uiState.errorMessage != null -> {
+                val errorMessage = uiState.errorMessage
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -250,18 +241,20 @@ fun IndividualProductScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = (productState as ResultState.Error).message,
+                        text = errorMessage ?: "",
                         color = Color.Red
                     )
                 }
             }
 
-            is ResultState.Success -> {
-                val product = (productState as ResultState.Success<Product>).data
-                IndividualProductContent(
-                    product = product,
-                    modifier = Modifier.padding(paddingValues)
-                )
+            uiState.product != null -> {
+                val product = uiState.product
+                if (product != null) {
+                    IndividualProductContent(
+                        product = product,
+                        modifier = Modifier.padding(paddingValues)
+                    )
+                }
             }
         }
     }

@@ -2,13 +2,13 @@ package com.example.shopapp.feature.cart.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.shopapp.core.domain.model.CartItem
 import com.example.shopapp.core.domain.repository.AuthRepository
 import com.example.shopapp.core.domain.repository.CartRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -18,19 +18,20 @@ class CartViewModel @Inject constructor(
     private val authRepository: AuthRepository
 ) : ViewModel() {
 
-    private val _cartItems = MutableStateFlow<List<CartItem>>(emptyList())
-    val cartItems: StateFlow<List<CartItem>> = _cartItems.asStateFlow()
-
-    private val _totalPrice = MutableStateFlow(0.0)
-    val totalPrice: StateFlow<Double> = _totalPrice.asStateFlow()
+    private val _uiState = MutableStateFlow(CartUiState())
+    val uiState: StateFlow<CartUiState> = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
             authRepository.getCurrentUserFlow().collect { user ->
                 val uid = user?.id ?: return@collect
                 cartRepository.getCartItems(uid).collect { items ->
-                    _cartItems.value = items
-                    _totalPrice.value = items.sumOf { it.productPrice * it.quantity }
+                    _uiState.update {
+                        it.copy(
+                            cartItems = items,
+                            totalPrice = items.sumOf { item -> item.productPrice * item.quantity }
+                        )
+                    }
                 }
             }
         }

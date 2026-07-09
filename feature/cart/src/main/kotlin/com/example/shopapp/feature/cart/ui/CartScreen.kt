@@ -50,8 +50,7 @@ fun CartScreen(
     onBackClick: () -> Unit,
     viewModel: CartViewModel = hiltViewModel()
 ) {
-    val cartItems by viewModel.cartItems.collectAsState()
-    val totalPrice by viewModel.totalPrice.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -80,7 +79,7 @@ fun CartScreen(
         },
         containerColor = Color(0xFFF8F8F8),
         bottomBar = {
-            if (cartItems.isNotEmpty()) {
+            if (uiState.cartItems.isNotEmpty()) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -100,14 +99,14 @@ fun CartScreen(
                                 color = Color.Gray
                             )
                             Text(
-                                text = "Rp ${formatPrice(totalPrice)}",
+                                text = "Rp ${formatPrice(uiState.totalPrice)}",
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF1A1A2E)
                             )
                         }
                         Text(
-                            text = "${cartItems.sumOf { it.quantity }} items",
+                            text = "${uiState.cartItems.sumOf { it.quantity }} items",
                             fontSize = 13.sp,
                             color = Color(0xFF3D5AF1),
                             fontWeight = FontWeight.Medium
@@ -117,7 +116,7 @@ fun CartScreen(
             }
         }
     ) { paddingValues ->
-        if (cartItems.isEmpty()) {
+        if (uiState.cartItems.isEmpty()) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -139,7 +138,7 @@ fun CartScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(
-                    items = cartItems,
+                    items = uiState.cartItems,
                     key = { it.productId }
                 ) { item ->
                     CartItemCard(

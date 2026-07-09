@@ -31,7 +31,7 @@ fun WishlistScreen(
     onProductClick: (Int) -> Unit,
     viewModel: WishlistViewModel = hiltViewModel()
 ) {
-    val wishlistItems by viewModel.wishlistItems.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -49,7 +49,7 @@ fun WishlistScreen(
         },
         containerColor = Color(0xFFF8F8F8)
     ) { paddingValues ->
-        if (wishlistItems.isEmpty()) {
+        if (uiState.wishlistItems.isEmpty()) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -79,7 +79,7 @@ fun WishlistScreen(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(wishlistItems, key = { it.productId }) { item ->
+                items(uiState.wishlistItems, key = { it.productId }) { item ->
                     WishlistItemCard(
                         item = item,
                         onProductClick = onProductClick,

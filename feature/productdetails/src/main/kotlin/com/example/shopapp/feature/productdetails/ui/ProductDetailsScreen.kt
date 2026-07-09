@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -48,7 +47,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.shopapp.core.domain.model.Product
-import com.example.shopapp.core.domain.model.ResultState
 import com.example.shopapp.feature.productdetails.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,7 +56,7 @@ fun ProductDetailsScreen(
     onBackClick: () -> Unit,
     viewModel: ProductDetailsViewModel = hiltViewModel()
 ) {
-    val productsState by viewModel.productsState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -88,8 +86,8 @@ fun ProductDetailsScreen(
         containerColor = Color(0xFF1A1A1A)
     ) { paddingValues ->
 
-        when (productsState) {
-            is ResultState.Loading -> {
+        when {
+            uiState.isLoading-> {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -100,7 +98,8 @@ fun ProductDetailsScreen(
                 }
             }
 
-            is ResultState.Error -> {
+            uiState.errorMessage != null -> {
+                val errorMessage = uiState.errorMessage
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -108,14 +107,14 @@ fun ProductDetailsScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = (productsState as ResultState.Error).message,
+                        text = errorMessage ?: "",
                         color = Color.Red
                     )
                 }
             }
 
-            is ResultState.Success -> {
-                val products = (productsState as ResultState.Success<List<Product>>).data
+            else -> {
+                val products = uiState.products
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     modifier = Modifier

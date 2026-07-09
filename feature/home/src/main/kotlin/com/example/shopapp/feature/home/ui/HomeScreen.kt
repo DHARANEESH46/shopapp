@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -54,7 +53,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.shopapp.core.domain.model.Product
-import com.example.shopapp.core.domain.model.ResultState
 import com.example.shopapp.feature.home.R
 
 
@@ -66,10 +64,7 @@ fun HomeScreen(
     onCartClick: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
-    val productsState by viewModel.productsState.collectAsState()
-    val searchQuery by viewModel.searchQuery.collectAsState()
-    val filteredProducts by viewModel.filteredProducts.collectAsState()
-    val cartCount by viewModel.cartCount.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -92,8 +87,8 @@ fun HomeScreen(
                     }
                     BadgedBox(
                         badge = {
-                            if (cartCount > 0) {
-                                Badge { Text("$cartCount") }
+                            if (uiState.cartCount > 0) {
+                                Badge { Text("${uiState.cartCount}") }
                             }
                         }
                     ) {
@@ -123,7 +118,7 @@ fun HomeScreen(
 
             // Search Bar
             OutlinedTextField(
-                value = searchQuery,
+                value = uiState.searchQuery,
                 onValueChange = viewModel::onSearchQueryChange,
                 placeholder = {
                     Text(
@@ -189,8 +184,8 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            when (productsState) {
-                is ResultState.Loading -> {
+            when {
+                uiState.isLoading -> {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -200,7 +195,7 @@ fun HomeScreen(
                         CircularProgressIndicator(color = Color(0xFF3D5AF1))
                     }
                 }
-                is ResultState.Error -> {
+                uiState.errorMessage != null -> {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -208,16 +203,16 @@ fun HomeScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = (productsState as ResultState.Error).message,
+                            text = uiState.errorMessage!!,
                             color = Color.Red
                         )
                     }
                 }
-                is ResultState.Success -> {
-                    val products = if (searchQuery.isBlank())
-                        filteredProducts.take(6)
+                else -> {
+                    val products = if (uiState.searchQuery.isBlank())
+                        uiState.filteredProducts.take(6)
                     else
-                        filteredProducts
+                        uiState.filteredProducts
 
                     FeaturedProductsGrid(
                         products = products,
