@@ -20,6 +20,8 @@ class ProductDetailsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ProductDetailsUiState())
     val uiState: StateFlow<ProductDetailsUiState> = _uiState.asStateFlow()
 
+    private var allProducts = listOf<com.example.shopapp.core.domain.model.Product>()
+
     init {
         loadProducts()
     }
@@ -29,10 +31,41 @@ class ProductDetailsViewModel @Inject constructor(
             getProductsUseCase().collect { state ->
                 when (state) {
                     is ResultState.Loading -> _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-                    is ResultState.Success -> _uiState.update { it.copy(isLoading = false, products = state.data) }
+                    is ResultState.Success -> {
+                        allProducts = state.data
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                products = applySorting(allProducts, it.selectedSort)
+                            )
+                        }
+                    }
                     is ResultState.Error -> _uiState.update { it.copy(isLoading = false, errorMessage = state.message) }
                 }
             }
         }
+    }
+
+    fun onSortSelected(sort: SortOption) {
+        _uiState.update {
+            it.copy(
+                selectedSort = sort,
+                products = applySorting(allProducts, sort),
+                showSortSheet = false
+            )
+        }
+    }
+
+    fun showSortSheet() { _uiState.update { it.copy(showSortSheet = true) } }
+    fun hideSortSheet() { _uiState.update { it.copy(showSortSheet = false) } }
+
+    private fun applySorting(
+        products: List<com.example.shopapp.core.domain.model.Product>,
+        sort: SortOption
+    ) = when (sort) {
+        SortOption.NAME_A_Z     -> products.sortedBy { it.title }
+        SortOption.NAME_Z_A     -> products.sortedByDescending { it.title }
+        SortOption.PRICE_HIGH_LOW -> products.sortedByDescending { it.price }
+        SortOption.PRICE_LOW_HIGH -> products.sortedBy { it.price }
     }
 }

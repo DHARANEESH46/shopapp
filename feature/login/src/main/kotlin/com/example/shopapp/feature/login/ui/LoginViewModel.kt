@@ -21,11 +21,11 @@ class LoginViewModel @Inject constructor(
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
     fun onUsernameChange(value: String) {
-        _uiState.update { it.copy(username = value) }
+        _uiState.update { it.copy(username = value, errorMessage = null) }
     }
 
     fun onPasswordChange(value: String) {
-        _uiState.update { it.copy(password = value) }
+        _uiState.update { it.copy(password = value, errorMessage = null) }
     }
 
     fun togglePasswordVisibility() {
@@ -41,7 +41,7 @@ class LoginViewModel @Inject constructor(
                 when (state) {
                     is AuthState.Loading -> _uiState.update { it.copy(isLoading = true, errorMessage = null) }
                     is AuthState.Success -> _uiState.update { it.copy(isLoading = false, isLoginSuccess = true) }
-                    is AuthState.Error -> _uiState.update { it.copy(isLoading = false, errorMessage = state.message) }
+                    is AuthState.Error -> _uiState.update { it.copy(isLoading = false, errorMessage = "Invalid username or password") }
                     is AuthState.Idle -> _uiState.update { it.copy(isLoading = false) }
                 }
             }

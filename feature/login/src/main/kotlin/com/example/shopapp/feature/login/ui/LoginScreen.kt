@@ -25,10 +25,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.shopapp.core.designsystem.component.ShopButton
 import com.example.shopapp.core.designsystem.component.ShopTextField
@@ -46,13 +48,9 @@ fun LoginScreen(
 
     val isFormFilled = uiState.username.isNotBlank() && uiState.password.isNotBlank()
 
-    LaunchedEffect(uiState.isLoginSuccess, uiState.errorMessage) {
+    LaunchedEffect(uiState.isLoginSuccess) {
         if (uiState.isLoginSuccess) {
             onLoginSuccess()
-            viewModel.resetState()
-        }
-        uiState.errorMessage?.let { message ->
-            snackbarHostState.showSnackbar(message)
             viewModel.resetState()
         }
     }
@@ -116,6 +114,16 @@ fun LoginScreen(
                     }
                 }
             )
+
+            if (uiState.errorMessage != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = uiState.errorMessage!!,
+                    color = Color(0xFFE53935),
+                    fontSize = 13.sp,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
 
             Spacer(modifier = Modifier.height(40.dp))
 

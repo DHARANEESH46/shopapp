@@ -157,7 +157,8 @@ fun ShopNavGraph(
                 arguments = listOf(navArgument("productId") { type = NavType.IntType })
             ) {
                 IndividualProductScreen(
-                    onBackClick = { navController.popBackStack() }
+                    onBackClick = { navController.popBackStack() },
+                    onCartClick = { navController.navigate(Routes.CART) }
                 )
             }
 

@@ -65,6 +65,7 @@ import com.example.shopapp.feature.individualproduct.R
 @Composable
 fun IndividualProductScreen(
     onBackClick: () -> Unit,
+    onCartClick: () -> Unit,
     viewModel: IndividualProductViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -111,11 +112,11 @@ fun IndividualProductScreen(
                     }
                     // Cart icon with count badge
                     Box {
-                        IconButton(onClick = { }) {
+                        IconButton(onClick = onCartClick) {
                             Icon(
                                 imageVector = Icons.Filled.ShoppingCart,
                                 contentDescription = stringResource(R.string.cart),
-                                tint = Color(0xFFE53935)
+                                tint = Color(0xFF1A1A2E)
                             )
                         }
                         if (uiState.cartCount > 0) {
