@@ -39,6 +39,9 @@ import com.example.shopapp.feature.login.ui.LoginScreen
 import com.example.shopapp.feature.productdetails.ui.ProductDetailsScreen
 import com.example.shopapp.feature.cart.ui.CartScreen
 import com.example.shopapp.feature.wishlist.ui.WishlistScreen
+import com.example.shopapp.feature.resetpassword.ui.resetpassword.ResetPasswordScreen
+import com.example.shopapp.feature.resetpassword.ui.verification.VerificationScreen
+import com.example.shopapp.feature.resetpassword.ui.updatepassword.UpdatePasswordScreen
 
 object Routes {
     const val LOGIN = "login"
@@ -49,6 +52,11 @@ object Routes {
     const val PRODUCT_DETAILS = "product_details"
     const val INDIVIDUAL_PRODUCT = "individual_product/{productId}"
     const val CART = "cart"
+    const val RESET_PASSWORD = "reset_password"
+    const val VERIFICATION = "verification/{contact}"
+    const val UPDATE_PASSWORD = "update_password"
+
+    fun verification(contact: String) = "verification/$contact"
 
     fun individualProduct(productId: Int) = "individual_product/$productId"
 }
@@ -103,6 +111,9 @@ fun ShopNavGraph(
                         navController.navigate(Routes.HOME) {
                             popUpTo(Routes.LOGIN) { inclusive = true }
                         }
+                    },
+                    onForgotPasswordClick = {
+                        navController.navigate(Routes.RESET_PASSWORD)
                     }
                 )
             }
@@ -165,6 +176,42 @@ fun ShopNavGraph(
             composable(route = Routes.CART) {
                 CartScreen(
                     onBackClick = { navController.popBackStack() }
+                )
+            }
+
+            composable(route = Routes.RESET_PASSWORD) {
+                ResetPasswordScreen(
+                    onBackClick = { navController.popBackStack() },
+                    onResetClick = { contact ->
+                        val safeContact = contact.ifBlank { "your device" }
+                        val encoded = java.net.URLEncoder.encode(safeContact, "UTF-8")
+                        navController.navigate(Routes.verification(encoded))
+                    }
+                )
+            }
+
+            composable(
+                route = Routes.VERIFICATION,
+                arguments = listOf(navArgument("contact") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val encodedContact = backStackEntry.arguments?.getString("contact") ?: ""
+                val contact = java.net.URLDecoder.decode(encodedContact, "UTF-8")
+                VerificationScreen(
+                    contact = contact,
+                    onBackClick = { navController.popBackStack() },
+                    onChangeClick = { navController.popBackStack() },
+                    onContinueClick = { navController.navigate(Routes.UPDATE_PASSWORD) }
+                )
+            }
+
+            composable(route = Routes.UPDATE_PASSWORD) {
+                UpdatePasswordScreen(
+                    onBackClick = { navController.popBackStack() },
+                    onSaveUpdateClick = {
+                        navController.navigate(Routes.LOGIN) {
+                            popUpTo(Routes.LOGIN) { inclusive = true }
+                        }
+                    }
                 )
             }
         }

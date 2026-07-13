@@ -41,6 +41,7 @@ import com.example.shopapp.feature.login.R
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
+    onForgotPasswordClick: () -> Unit = {},
     viewModel: LoginViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -140,7 +141,7 @@ fun LoginScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                TextButton(onClick = { }) {
+                TextButton(onClick = onForgotPasswordClick) {
                     Text(text = stringResource(R.string.forgot_password), color = TextSecondary)
                 }
                 TextButton(onClick = { }) {

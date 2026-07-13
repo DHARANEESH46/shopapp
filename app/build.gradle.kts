@@ -49,6 +49,7 @@ dependencies {
     implementation(project(":feature:account"))
     implementation(project(":feature:cart"))
     implementation(project(":feature:wishlist"))
+    implementation(project(":feature:resetpassword"))
 
     // Core modules
     implementation(project(":core:data"))
