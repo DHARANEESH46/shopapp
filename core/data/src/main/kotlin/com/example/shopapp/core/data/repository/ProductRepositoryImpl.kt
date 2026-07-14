@@ -20,9 +20,8 @@ import javax.inject.Inject
 class ProductRepositoryImpl @Inject constructor(
     private val shopApi: ShopApi,
     private val productDao: ProductDao,
-    @ApplicationContext private val context: Context   // ← add this
+    @ApplicationContext private val context: Context
 ) : ProductRepository {
-
 
     private fun isOnline(): Boolean {
         val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -31,83 +30,40 @@ class ProductRepositoryImpl @Inject constructor(
         return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 
-    override fun getProducts(): Flow<ResultState<List<Product>>> = flow {
+    override fun getProducts(
+        limit: Int,
+        skip: Int,
+        sortBy: String,
+        order: String
+    ): Flow<ResultState<List<Product>>> = flow {
         emit(ResultState.Loading)
-
-
-        val cachedEntities = productDao.getAllProducts().first()
-        if (cachedEntities.isNotEmpty()) {
-            emit(ResultState.Success(cachedEntities.map { it.toDomain() }))
+        if (!isOnline()) {
+            emit(ResultState.Error("No internet connection"))
+            return@flow
         }
-
-
-        if (isOnline()) {
-            try {
-                val response = shopApi.getProducts()
-                val products = response.products.map { it.toDomain() }
-
-                productDao.clearAllProducts()
-                productDao.insertProducts(products.map { it.toEntity() })
-                emit(ResultState.Success(products))
-            } catch (e: Exception) {
-
-
-                if (cachedEntities.isEmpty()) {
-                    emit(ResultState.Error(e.message ?: "Unknown error occurred"))
-                }
-            }
-        } else {
-
-
-            if (cachedEntities.isEmpty()) {
-                emit(ResultState.Error("No internet connection and no cached data available"))
-            }
-
+        try {
+            val response = shopApi.getProducts(limit, skip, sortBy, order)
+            emit(ResultState.Success(response.products.map { it.toDomain() }))
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message ?: "Unknown error"))
         }
     }
 
     override fun getProductById(id: Int): Flow<ResultState<Product>> = flow {
         emit(ResultState.Loading)
-
-
-        val cachedEntity = productDao.getProductById(id).first()
-        if (cachedEntity != null) {
-            emit(ResultState.Success(cachedEntity.toDomain()))
-        }
-
-
+        val cached = productDao.getProductById(id).first()
+        if (cached != null) emit(ResultState.Success(cached.toDomain()))
         if (isOnline()) {
             try {
-                val productDto = shopApi.getProductById(id)
-                val product = productDto.toDomain()
+                val dto = shopApi.getProductById(id)
+                val product = dto.toDomain()
                 productDao.insertProduct(product.toEntity())
                 emit(ResultState.Success(product))
             } catch (e: Exception) {
-                if (cachedEntity == null) {
-                    emit(ResultState.Error(e.message ?: "Unknown error occurred"))
-                }
+                if (cached == null) emit(ResultState.Error(e.message ?: "Unknown error"))
             }
         } else {
-            if (cachedEntity == null) {
-                emit(ResultState.Error("No internet connection and product not cached"))
-            }
-        }
-    }
-
-    override fun getProductsByCategory(category: String): Flow<ResultState<List<Product>>> = flow {
-        emit(ResultState.Loading)
-
-
-        if (isOnline()) {
-            try {
-                val response = shopApi.getProductsByCategory(category)
-                val products = response.products.map { it.toDomain() }
-                emit(ResultState.Success(products))
-            } catch (e: Exception) {
-                emit(ResultState.Error(e.message ?: "Unknown error occurred"))
-            }
-        } else {
-            emit(ResultState.Error("No internet connection"))
+            if (cached == null) emit(ResultState.Error("No internet connection"))
         }
     }
 }

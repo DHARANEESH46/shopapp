@@ -58,6 +58,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.shopapp.core.domain.model.Product
 import com.example.shopapp.feature.productdetails.R
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
+import com.example.shopapp.core.domain.model.SortOption
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -154,8 +160,22 @@ fun ProductDetailsScreen(
             }
 
             else -> {
+                val gridState = rememberLazyGridState()
+
+                // Detect when user has scrolled near the bottom
+                LaunchedEffect(gridState) {
+                    snapshotFlow {
+                        val lastVisible = gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                        val total = gridState.layoutInfo.totalItemsCount
+                        lastVisible >= total - 3
+                    }.distinctUntilChanged().collect { nearEnd ->
+                        if (nearEnd) viewModel.loadNextPage()
+                    }
+                }
+
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
+                    state = gridState,
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
@@ -169,6 +189,23 @@ fun ProductDetailsScreen(
                             product = product,
                             onProductClick = onProductClick
                         )
+                    }
+
+                    // Show a loading spinner at the bottom while fetching next page
+                    if (uiState.isLoadingMore) {
+                        item(span = { GridItemSpan(2) }) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(
+                                    color = Color(0xFF3D5AF1),
+                                    modifier = Modifier.size(28.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }

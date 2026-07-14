@@ -8,11 +8,17 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ShopApi {
 
     @GET("products")
-    suspend fun getProducts(): ProductsResponseDto
+    suspend fun getProducts(
+        @Query("limit") limit: Int = 10,
+        @Query("skip") skip: Int = 0,
+        @Query("sortBy") sortBy: String = "title",
+        @Query("order") order: String = "asc"
+    ): ProductsResponseDto
 
     @GET("products/{id}")
     suspend fun getProductById(@Path("id") id: Int): ProductDto

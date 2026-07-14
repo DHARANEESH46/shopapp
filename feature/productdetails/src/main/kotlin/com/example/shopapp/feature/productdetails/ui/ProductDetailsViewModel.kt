@@ -3,6 +3,7 @@ package com.example.shopapp.feature.productdetails.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.shopapp.core.domain.model.ResultState
+import com.example.shopapp.core.domain.model.SortOption
 import com.example.shopapp.core.domain.usecase.GetProductsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,6 +13,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+private const val PAGE_SIZE = 10
+
 @HiltViewModel
 class ProductDetailsViewModel @Inject constructor(
     private val getProductsUseCase: GetProductsUseCase
@@ -20,27 +23,62 @@ class ProductDetailsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ProductDetailsUiState())
     val uiState: StateFlow<ProductDetailsUiState> = _uiState.asStateFlow()
 
-    private var allProducts = listOf<com.example.shopapp.core.domain.model.Product>()
-
     init {
-        loadProducts()
+        loadFirstPage()
     }
 
-    fun loadProducts() {
+    private fun loadFirstPage() {
+        _uiState.update {
+            it.copy(
+                products = emptyList(),
+                currentSkip = 0,
+                hasReachedEnd = false,
+                isLoading = true,
+                errorMessage = null
+            )
+        }
+        fetchPage(skip = 0)
+    }
+
+    fun loadNextPage() {
+        val state = _uiState.value
+        if (state.isLoadingMore || state.hasReachedEnd) return
+        _uiState.update { it.copy(isLoadingMore = true) }
+        fetchPage(skip = state.currentSkip)
+    }
+
+    private fun fetchPage(skip: Int) {
+        val sort = _uiState.value.selectedSort
         viewModelScope.launch {
-            getProductsUseCase().collect { state ->
+            getProductsUseCase(
+                limit = PAGE_SIZE,
+                skip = skip,
+                sortBy = sort.sortBy,
+                order = sort.order
+            ).collect { state ->
                 when (state) {
-                    is ResultState.Loading -> _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+                    is ResultState.Loading -> { /* already set above */ }
                     is ResultState.Success -> {
-                        allProducts = state.data
+                        val newItems = state.data
                         _uiState.update {
                             it.copy(
                                 isLoading = false,
-                                products = applySorting(allProducts, it.selectedSort)
+                                isLoadingMore = false,
+                                products = it.products + newItems,
+                                currentSkip = it.currentSkip + newItems.size,
+                                hasReachedEnd = newItems.size < PAGE_SIZE
                             )
                         }
                     }
-                    is ResultState.Error -> _uiState.update { it.copy(isLoading = false, errorMessage = state.message) }
+                    is ResultState.Error -> {
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                isLoadingMore = false,
+                                errorMessage = state.message
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -48,24 +86,11 @@ class ProductDetailsViewModel @Inject constructor(
 
     fun onSortSelected(sort: SortOption) {
         _uiState.update {
-            it.copy(
-                selectedSort = sort,
-                products = applySorting(allProducts, sort),
-                showSortSheet = false
-            )
+            it.copy(selectedSort = sort, showSortSheet = false)
         }
+        loadFirstPage()
     }
 
     fun showSortSheet() { _uiState.update { it.copy(showSortSheet = true) } }
     fun hideSortSheet() { _uiState.update { it.copy(showSortSheet = false) } }
-
-    private fun applySorting(
-        products: List<com.example.shopapp.core.domain.model.Product>,
-        sort: SortOption
-    ) = when (sort) {
-        SortOption.NAME_A_Z     -> products.sortedBy { it.title }
-        SortOption.NAME_Z_A     -> products.sortedByDescending { it.title }
-        SortOption.PRICE_HIGH_LOW -> products.sortedByDescending { it.price }
-        SortOption.PRICE_LOW_HIGH -> products.sortedBy { it.price }
-    }
 }

@@ -7,9 +7,14 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class GetProductsUseCase @Inject constructor(
-    private val productRepository: ProductRepository
+    private val repository: ProductRepository
 ) {
-    operator fun invoke(): Flow<ResultState<List<Product>>> {
-        return productRepository.getProducts()
+    operator fun invoke(
+        limit: Int = 10,
+        skip: Int = 0,
+        sortBy: String = "title",
+        order: String = "asc"
+    ): Flow<ResultState<List<Product>>> {
+        return repository.getProducts(limit, skip, sortBy, order)
     }
 }
