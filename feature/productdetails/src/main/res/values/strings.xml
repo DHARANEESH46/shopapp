@@ -3,4 +3,10 @@
     <string name="all_products">All Products</string>
     <string name="more">More</string>
     <string name="back">Back</string>
+    <string name="retry">Retry</string>
+    <string name="sort">Sort</string>
+    <string name="something_went_wrong">Something went wrong</string>
+    <string name="selected">Selected</string>
+    <string name="reset">Reset</string>
+    <string name="apply">Apply</string>
 </resources>

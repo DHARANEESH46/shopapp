@@ -16,14 +16,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.example.shopapp.core.designsystem.theme.Background
+import com.example.shopapp.core.designsystem.theme.CardTitleText
+import com.example.shopapp.core.designsystem.theme.EmptyStateText
+import com.example.shopapp.core.designsystem.theme.Error
+import com.example.shopapp.core.designsystem.theme.Placeholder
+import com.example.shopapp.core.designsystem.theme.PriceSubtotal
+import com.example.shopapp.core.designsystem.theme.Surface
+import com.example.shopapp.core.designsystem.theme.SurfaceVariant
 import com.example.shopapp.core.domain.model.WishlistItem
+import com.example.shopapp.feature.wishlist.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,16 +45,14 @@ fun WishlistScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "My Wishlist",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        color = Color(0xFF1A1A2E)
+                        text = stringResource(R.string.my_wishlist),
+                        style = MaterialTheme.typography.titleLarge
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Surface)
             )
         },
-        containerColor = Color(0xFFF8F8F8)
+        containerColor = Background
     ) { paddingValues ->
         if (uiState.wishlistItems.isEmpty()) {
             Box(
@@ -60,14 +65,13 @@ fun WishlistScreen(
                     Icon(
                         imageVector = Icons.Default.FavoriteBorder,
                         contentDescription = null,
-                        tint = Color.LightGray,
+                        tint = Placeholder,
                         modifier = Modifier.size(72.dp)
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "Your wishlist is empty",
-                        fontSize = 16.sp,
-                        color = Color.Gray
+                        text = stringResource(R.string.your_wishlist_is_empty),
+                        style = EmptyStateText
                     )
                 }
             }
@@ -102,7 +106,7 @@ fun WishlistItemCard(
             .fillMaxWidth()
             .clickable { onProductClick(item.productId) },
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = Surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
@@ -115,31 +119,27 @@ fun WishlistItemCard(
                 modifier = Modifier
                     .size(80.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(Color(0xFFF5F5F5)),
+                    .background(SurfaceVariant),
                 contentScale = ContentScale.Crop
             )
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = item.productTitle,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFF1A1A2E),
+                    style = CardTitleText,
                     maxLines = 2
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
                     text = "Rp ${formatWishlistPrice(item.productPrice)}",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFFE53935)
+                    style = PriceSubtotal
                 )
             }
             IconButton(onClick = onRemove) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = "Remove",
-                    tint = Color(0xFFE53935)
+                    contentDescription = stringResource(R.string.remove),
+                    tint = Error
                 )
             }
         }

@@ -42,6 +42,7 @@ import com.example.shopapp.feature.wishlist.ui.WishlistScreen
 import com.example.shopapp.feature.resetpassword.ui.resetpassword.ResetPasswordScreen
 import com.example.shopapp.feature.resetpassword.ui.verification.VerificationScreen
 import com.example.shopapp.feature.resetpassword.ui.updatepassword.UpdatePasswordScreen
+import com.example.shopapp.feature.search.ui.SearchScreen
 
 object Routes {
     const val LOGIN = "login"
@@ -55,6 +56,8 @@ object Routes {
     const val RESET_PASSWORD = "reset_password"
     const val VERIFICATION = "verification/{contact}"
     const val UPDATE_PASSWORD = "update_password"
+
+    const val SEARCH = "search"
 
     fun verification(contact: String) = "verification/$contact"
 
@@ -128,6 +131,18 @@ fun ShopNavGraph(
                     },
                     onCartClick = {
                         navController.navigate(Routes.CART)
+                    },
+                    onSearchClick = {                          // ← add this
+                        navController.navigate(Routes.SEARCH)
+                    }
+                )
+            }
+
+            composable(route = Routes.SEARCH) {
+                SearchScreen(
+                    onBackClick = { navController.popBackStack() },
+                    onProductClick = { productId ->
+                        navController.navigate(Routes.individualProduct(productId))
                     }
                 )
             }

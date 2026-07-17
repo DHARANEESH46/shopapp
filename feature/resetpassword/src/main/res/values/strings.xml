@@ -2,26 +2,26 @@
 <resources>
     <!-- Reset Password -->
     <string name="reset_password">Reset Password</string>
-    <string name="reset_password_subtitle">Masukan Email/ No. Hp akun untuk mereset kata sandi Anda</string>
+    <string name="reset_password_subtitle">Enter your email account or mobile number to reset your password.</string>
     <string name="email_phone">Email/ Phone</string>
     <string name="enter_email_or_phone">Enter your email or phone number</string>
     <string name="reset">Reset</string>
 
     <!-- Verification -->
     <string name="verification">Verification</string>
-    <string name="verification_subtitle">Kami telah mengirimkan kode verifikasi ke</string>
-    <string name="change">Ganti?</string>
+    <string name="verification_subtitle">We have sent a verification code to</string>
+    <string name="change">Change?</string>
     <string name="verification_code">Verification Code</string>
     <string name="resend_code">Re-send Code</string>
-    <string name="resend_code_in">Kirim kode ulang dalam</string>
+    <string name="resend_code_in">Resend code in</string>
     <string name="continue_text">Continue</string>
 
     <!-- Update Password -->
     <string name="update_password">Update Password</string>
-    <string name="update_password_subtitle">Lengkapi data terakhir berikut untuk masuk ke aplikasi Shop App</string>
+    <string name="update_password_subtitle">Complete the following final details to log in to the Shop App.</string>
     <string name="new_password">New Password</string>
     <string name="enter_new_password">Enter your new password</string>
-    <string name="password_hint">Kata sandi harus 6 karakter atau lebih</string>
+    <string name="password_hint">The password must be 6 characters or longer.</string>
     <string name="confirm_new_password">Confirm New Password</string>
     <string name="re_enter_new_password">Re-enter your new password</string>
     <string name="save_update">Save Update</string>

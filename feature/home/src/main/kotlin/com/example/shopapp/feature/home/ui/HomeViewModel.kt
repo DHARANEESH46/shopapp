@@ -6,7 +6,7 @@ import com.example.shopapp.core.domain.model.Product
 import com.example.shopapp.core.domain.model.ResultState
 import com.example.shopapp.core.domain.repository.AuthRepository
 import com.example.shopapp.core.domain.repository.CartRepository
-import com.example.shopapp.core.domain.usecase.GetProductsUseCase
+import com.example.shopapp.core.domain.usecase.GetFeaturedProductsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +17,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val getProductsUseCase: GetProductsUseCase,
+    private val getFeaturedProductsUseCase: GetFeaturedProductsUseCase,
     private val cartRepository: CartRepository,
     private val authRepository: AuthRepository
 ) : ViewModel() {
@@ -34,7 +34,7 @@ class HomeViewModel @Inject constructor(
 
     fun loadProducts() {
         viewModelScope.launch {
-            getProductsUseCase().collect { state ->
+            getFeaturedProductsUseCase().collect { state ->
                 when (state) {
                     is ResultState.Loading -> _uiState.update { it.copy(isLoading = true, errorMessage = null) }
                     is ResultState.Success -> {

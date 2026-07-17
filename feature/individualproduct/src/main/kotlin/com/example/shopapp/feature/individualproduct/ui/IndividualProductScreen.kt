@@ -34,6 +34,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -49,14 +50,28 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.example.shopapp.core.designsystem.theme.CommentText
+import com.example.shopapp.core.designsystem.theme.Divider
+import com.example.shopapp.core.designsystem.theme.DividerLight
+import com.example.shopapp.core.designsystem.theme.Error
+import com.example.shopapp.core.designsystem.theme.OnPrimary
+import com.example.shopapp.core.designsystem.theme.OnSecondary
+import com.example.shopapp.core.designsystem.theme.Primary
+import com.example.shopapp.core.designsystem.theme.RatingText
+import com.example.shopapp.core.designsystem.theme.Secondary
+import com.example.shopapp.core.designsystem.theme.StarColor
+import com.example.shopapp.core.designsystem.theme.StarEmpty
+import com.example.shopapp.core.designsystem.theme.StepperBackground
+import com.example.shopapp.core.designsystem.theme.Surface
+import com.example.shopapp.core.designsystem.theme.SurfaceVariant
+import com.example.shopapp.core.designsystem.theme.TextBody
+import com.example.shopapp.core.designsystem.theme.TextPrimary
+import com.example.shopapp.core.designsystem.theme.TextSecondary
 import com.example.shopapp.core.domain.model.Product
 import com.example.shopapp.core.domain.model.Review
 import com.example.shopapp.feature.individualproduct.R
@@ -73,7 +88,6 @@ fun IndividualProductScreen(
     var showCartDialog by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
 
-
     LaunchedEffect(uiState.snackbarMessage) {
         uiState.snackbarMessage?.let {
             snackbarHostState.showSnackbar(it)
@@ -88,9 +102,7 @@ fun IndividualProductScreen(
                 title = {
                     Text(
                         text = stringResource(R.string.detail_product),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        color = Color(0xFF1A1A2E)
+                        style = MaterialTheme.typography.titleLarge
                     )
                 },
                 navigationIcon = {
@@ -98,7 +110,7 @@ fun IndividualProductScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.back),
-                            tint = Color(0xFF1A1A2E)
+                            tint = TextPrimary
                         )
                     }
                 },
@@ -107,53 +119,50 @@ fun IndividualProductScreen(
                         Icon(
                             imageVector = Icons.Filled.Share,
                             contentDescription = stringResource(R.string.share),
-                            tint = Color(0xFF1A1A2E)
+                            tint = TextPrimary
                         )
                     }
-                    // Cart icon with count badge
                     Box {
                         IconButton(onClick = onCartClick) {
                             Icon(
                                 imageVector = Icons.Filled.ShoppingCart,
                                 contentDescription = stringResource(R.string.cart),
-                                tint = Color(0xFF1A1A2E)
+                                tint = TextPrimary
                             )
                         }
                         if (uiState.cartCount > 0) {
                             Box(
                                 modifier = Modifier
                                     .size(16.dp)
-                                    .background(Color(0xFF3D5AF1), CircleShape)
+                                    .background(Primary, CircleShape)
                                     .align(Alignment.TopEnd),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
                                     text = "${uiState.cartCount}",
-                                    color = Color.White,
-                                    fontSize = 9.sp,
-                                    fontWeight = FontWeight.Bold
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = OnPrimary
                                 )
                             }
                         }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White
+                    containerColor = Surface
                 )
             )
         },
-        containerColor = Color.White,
+        containerColor = Surface,
         bottomBar = {
             val product = uiState.product
             if (product != null) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color.White)
+                        .background(Surface)
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // Wishlist button
                     Button(
                         onClick = { viewModel.toggleWishlist(product) },
                         modifier = Modifier
@@ -161,26 +170,24 @@ fun IndividualProductScreen(
                             .height(50.dp),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (uiState.isInWishlist) Color(0xFFE53935) else Color.White
+                            containerColor = if (uiState.isInWishlist) Secondary else Surface
                         ),
-                        border = BorderStroke(1.dp, Color(0xFFE53935))
+                        border = BorderStroke(1.dp, Secondary)
                     ) {
                         Icon(
                             imageVector = if (uiState.isInWishlist) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                            contentDescription = "Wishlist",
-                            tint = if (uiState.isInWishlist) Color.White else Color(0xFFE53935),
+                            contentDescription = stringResource(id=R.string.wishlist),
+                            tint = if (uiState.isInWishlist) OnSecondary else Secondary,
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = if (uiState.isInWishlist) "Added" else "Wishlist",
-                            color = if (uiState.isInWishlist) Color.White else Color(0xFFE53935),
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 14.sp
+                            style = MaterialTheme.typography.labelLarge,
+                            color = if (uiState.isInWishlist) OnSecondary else Secondary
                         )
                     }
 
-                    // Add to Cart button — opens dialog
                     Button(
                         onClick = { showCartDialog = true },
                         modifier = Modifier
@@ -188,21 +195,20 @@ fun IndividualProductScreen(
                             .height(50.dp),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF3D5AF1)
+                            containerColor = Primary
                         )
                     ) {
                         Icon(
                             imageVector = Icons.Filled.ShoppingCart,
                             contentDescription = null,
-                            tint = Color.White,
+                            tint = OnPrimary,
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = stringResource(R.string.add_to_cart),
-                            color = Color.White,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 14.sp
+                            style = MaterialTheme.typography.labelLarge,
+                            color = OnPrimary
                         )
                     }
                 }
@@ -229,7 +235,7 @@ fun IndividualProductScreen(
                         .padding(paddingValues),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = Color(0xFF3D5AF1))
+                    CircularProgressIndicator(color = Primary)
                 }
             }
 
@@ -243,7 +249,8 @@ fun IndividualProductScreen(
                 ) {
                     Text(
                         text = errorMessage ?: "",
-                        color = Color.Red
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Error
                     )
                 }
             }
@@ -261,8 +268,6 @@ fun IndividualProductScreen(
     }
 }
 
-
-
 @Composable
 fun AddToCartDialog(
     productName: String,
@@ -274,7 +279,7 @@ fun AddToCartDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = Color.White,
+        containerColor = Surface,
         shape = RoundedCornerShape(16.dp),
         title = {
             Row(
@@ -283,16 +288,14 @@ fun AddToCartDialog(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = stringResource(id=R.string.add_to_cart),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    color = Color(0xFF1A1A2E)
+                    text = stringResource(id = R.string.add_to_cart),
+                    style = MaterialTheme.typography.titleLarge
                 )
                 IconButton(onClick = onDismiss) {
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = stringResource(R.string.close),
-                        tint = Color.Gray
+                        tint = TextSecondary
                     )
                 }
             }
@@ -300,7 +303,6 @@ fun AddToCartDialog(
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
 
-                // ── Quantity Row ──
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -308,16 +310,13 @@ fun AddToCartDialog(
                 ) {
                     Text(
                         text = stringResource(R.string.quantity),
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color(0xFF1A1A2E)
+                        style = MaterialTheme.typography.titleSmall
                     )
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        // Decrease button
                         Box(
                             modifier = Modifier
                                 .size(32.dp)
-                                .background(Color(0xFFF0F0F0), RoundedCornerShape(8.dp)),
+                                .background(StepperBackground, RoundedCornerShape(8.dp)),
                             contentAlignment = Alignment.Center
                         ) {
                             IconButton(
@@ -326,27 +325,21 @@ fun AddToCartDialog(
                             ) {
                                 Text(
                                     text = "−",
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF1A1A2E)
+                                    style = MaterialTheme.typography.titleLarge
                                 )
                             }
                         }
 
-                        // Quantity number
                         Text(
                             text = "$quantity",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            color = Color(0xFF1A1A2E)
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(horizontal = 16.dp)
                         )
 
-                        // Increase button
                         Box(
                             modifier = Modifier
                                 .size(32.dp)
-                                .background(Color(0xFF3D5AF1), RoundedCornerShape(8.dp)),
+                                .background(Primary, RoundedCornerShape(8.dp)),
                             contentAlignment = Alignment.Center
                         ) {
                             IconButton(
@@ -355,9 +348,8 @@ fun AddToCartDialog(
                             ) {
                                 Text(
                                     text = "+",
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = OnPrimary
                                 )
                             }
                         }
@@ -366,23 +358,18 @@ fun AddToCartDialog(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // ── Total Price ──
                 Text(
                     text = stringResource(R.string.total),
-                    fontSize = 13.sp,
-                    color = Color.Gray
+                    style = MaterialTheme.typography.bodySmall
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "Rp ${formatPrice(productPrice * quantity)}",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1A1A2E)
+                    style = MaterialTheme.typography.headlineSmall
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // ── Confirm Button ──
                 Button(
                     onClick = { onConfirm(quantity) },
                     modifier = Modifier
@@ -390,26 +377,21 @@ fun AddToCartDialog(
                         .height(50.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF3D5AF1)
+                        containerColor = Primary
                     )
                 ) {
                     Text(
-                        text =stringResource(id=R.string.add_to_cart),
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 15.sp
+                        text = stringResource(id = R.string.add_to_cart),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = OnPrimary
                     )
                 }
             }
         },
-        // We put the confirm button inside text block above for full width
         confirmButton = {}
     )
 }
 
-// ─────────────────────────────────────────────
-// Product Content
-// ─────────────────────────────────────────────
 @Composable
 private fun IndividualProductContent(
     product: Product,
@@ -426,7 +408,7 @@ private fun IndividualProductContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(280.dp)
-                .background(Color(0xFFF5F5F5)),
+                .background(SurfaceVariant),
             contentScale = ContentScale.Fit
         )
 
@@ -436,18 +418,15 @@ private fun IndividualProductContent(
 
             Text(
                 text = product.title,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF1A1A2E)
+                style = MaterialTheme.typography.headlineSmall
             )
 
             Spacer(modifier = Modifier.height(6.dp))
 
             Text(
                 text = "Rp ${formatPrice(product.price)}",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFFE53935)
+                style = MaterialTheme.typography.titleLarge,
+                color = Secondary
             )
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -456,49 +435,41 @@ private fun IndividualProductContent(
                 Icon(
                     imageVector = Icons.Filled.Star,
                     contentDescription = null,
-                    tint = Color(0xFFFFC107),
+                    tint = StarColor,
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "${product.rating}",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1A1A2E)
+                    style = RatingText
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = "${product.reviews.size} Reviews",
-                    fontSize = 13.sp,
-                    color = Color.Gray
+                    style = MaterialTheme.typography.bodySmall
                 )
             }
 
             Spacer(modifier = Modifier.height(20.dp))
-            HorizontalDivider(color = Color(0xFFEEEEEE))
+            HorizontalDivider(color = DividerLight)
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
                 text = stringResource(R.string.description_product),
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF1A1A2E)
+                style = MaterialTheme.typography.titleMedium
             )
 
             Spacer(modifier = Modifier.height(10.dp))
 
             Text(
                 text = product.description,
-                fontSize = 14.sp,
-                color = Color(0xFF555555),
-                lineHeight = 22.sp
+                style = MaterialTheme.typography.bodyMedium
             )
 
             Spacer(modifier = Modifier.height(20.dp))
-            HorizontalDivider(color = Color(0xFFEEEEEE))
+            HorizontalDivider(color = DividerLight)
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Reviews header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -506,23 +477,19 @@ private fun IndividualProductContent(
             ) {
                 Text(
                     text = "Review (${product.reviews.size})",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1A1A2E)
+                    style = MaterialTheme.typography.titleMedium
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Filled.Star,
                         contentDescription = null,
-                        tint = Color(0xFFFFC107),
+                        tint = StarColor,
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = "${product.rating}",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1A1A2E)
+                        style = RatingText
                     )
                 }
             }
@@ -532,8 +499,7 @@ private fun IndividualProductContent(
             if (product.reviews.isEmpty()) {
                 Text(
                     text = stringResource(R.string.no_reviews_yet),
-                    fontSize = 14.sp,
-                    color = Color.Gray
+                    style = MaterialTheme.typography.bodyMedium
                 )
             } else {
                 product.reviews.forEach { review ->
@@ -558,28 +524,24 @@ private fun ReviewItem(review: Review) {
                 modifier = Modifier
                     .size(42.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFFE0E0E0)),
+                    .background(Divider),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = review.reviewerName.first().toString(),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF555555)
+                    style = MaterialTheme.typography.titleMedium,
+                    color = TextBody
                 )
             }
             Spacer(modifier = Modifier.width(10.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = review.reviewerName,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFF1A1A2E)
+                    style = MaterialTheme.typography.labelLarge
                 )
                 Text(
                     text = formatDate(review.date),
-                    fontSize = 12.sp,
-                    color = Color.Gray
+                    style = MaterialTheme.typography.bodySmall
                 )
             }
         }
@@ -591,8 +553,7 @@ private fun ReviewItem(review: Review) {
                 Icon(
                     imageVector = Icons.Filled.Star,
                     contentDescription = null,
-                    tint = if (index < review.rating) Color(0xFFFFC107)
-                    else Color(0xFFDDDDDD),
+                    tint = if (index < review.rating) StarColor else StarEmpty,
                     modifier = Modifier.size(16.dp)
                 )
             }
@@ -602,9 +563,7 @@ private fun ReviewItem(review: Review) {
 
         Text(
             text = review.comment,
-            fontSize = 13.sp,
-            color = Color(0xFF666666),
-            lineHeight = 20.sp
+            style = CommentText
         )
     }
 }

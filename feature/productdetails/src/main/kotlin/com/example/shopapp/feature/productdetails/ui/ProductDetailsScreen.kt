@@ -16,8 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -34,6 +34,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -47,23 +48,35 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
+import com.example.shopapp.core.designsystem.theme.ButtonLabelText
+import com.example.shopapp.core.designsystem.theme.DividerLight
+import com.example.shopapp.core.designsystem.theme.Error
+import com.example.shopapp.core.designsystem.theme.FilledButtonLabelText
+import com.example.shopapp.core.designsystem.theme.OnPrimary
+import com.example.shopapp.core.designsystem.theme.OutlinedButtonLabelText
+import com.example.shopapp.core.designsystem.theme.Primary
+import com.example.shopapp.core.designsystem.theme.PriceLabel
+import com.example.shopapp.core.designsystem.theme.ProductTitleText
+import com.example.shopapp.core.designsystem.theme.RatingCountText
+import com.example.shopapp.core.designsystem.theme.ReviewCountText
+import com.example.shopapp.core.designsystem.theme.SortOptionText
+import com.example.shopapp.core.designsystem.theme.StarColor
+import com.example.shopapp.core.designsystem.theme.Surface
+import com.example.shopapp.core.designsystem.theme.SurfaceDark
+import com.example.shopapp.core.designsystem.theme.TextPrimary
+import com.example.shopapp.core.designsystem.theme.TextSecondary
 import com.example.shopapp.core.domain.model.Product
-import com.example.shopapp.feature.productdetails.R
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.snapshotFlow
 import com.example.shopapp.core.domain.model.SortOption
-import kotlinx.coroutines.flow.distinctUntilChanged
+import com.example.shopapp.feature.productdetails.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,15 +87,16 @@ fun ProductDetailsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    // Official Paging 3 Compose API — collectAsLazyPagingItems()
+    val lazyPagingItems = viewModel.pagedProducts.collectAsLazyPagingItems()
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
                         text = stringResource(R.string.all_products),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        color = Color(0xFF1A1A2E)
+                        style = MaterialTheme.typography.titleLarge
                     )
                 },
                 navigationIcon = {
@@ -90,20 +104,18 @@ fun ProductDetailsScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.back),
-                            tint = Color(0xFF1A1A2E)
+                            tint = TextPrimary
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White
-                )
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Surface)
             )
         },
         bottomBar = {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFF1A1A1A))
+                    .background(SurfaceDark)
                     .padding(horizontal = 16.dp, vertical = 12.dp)
             ) {
                 Button(
@@ -112,87 +124,90 @@ fun ProductDetailsScreen(
                         .fillMaxWidth()
                         .height(50.dp),
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3D5AF1))
+                    colors = ButtonDefaults.buttonColors(containerColor = Primary)
                 ) {
                     Icon(
                         imageVector = Icons.Default.SwapVert,
-                        contentDescription = "Sort",
-                        tint = Color.White,
+                        contentDescription = stringResource(R.string.sort),
+                        tint = OnPrimary,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Sort",
-                        color = Color.White,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 15.sp
+                        text = stringResource(id=R.string.sort),
+                        style = ButtonLabelText
                     )
                 }
             }
         },
-        containerColor = Color(0xFF1A1A1A)
+        containerColor = SurfaceDark
     ) { paddingValues ->
 
         when {
-            uiState.isLoading -> {
+            // First load — full screen spinner
+            lazyPagingItems.loadState.refresh is LoadState.Loading -> {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = Color(0xFF3D5AF1))
+                    CircularProgressIndicator(color = Primary)
                 }
             }
 
-            uiState.errorMessage != null -> {
+            // First load error
+            lazyPagingItems.loadState.refresh is LoadState.Error -> {
+                val error = (lazyPagingItems.loadState.refresh as LoadState.Error).error
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = uiState.errorMessage ?: "",
-                        color = Color.Red
-                    )
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = error.message ?: stringResource(R.string.something_went_wrong),
+                            color = Error
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(
+                            onClick = { lazyPagingItems.retry() },
+                            colors = ButtonDefaults.buttonColors(containerColor = Primary)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.retry),
+                                style = FilledButtonLabelText
+                            )
+                        }
+                    }
                 }
             }
 
             else -> {
-                val gridState = rememberLazyGridState()
-
-                // Detect when user has scrolled near the bottom
-                LaunchedEffect(gridState) {
-                    snapshotFlow {
-                        val lastVisible = gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-                        val total = gridState.layoutInfo.totalItemsCount
-                        lastVisible >= total - 3
-                    }.distinctUntilChanged().collect { nearEnd ->
-                        if (nearEnd) viewModel.loadNextPage()
-                    }
-                }
-
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
-                    state = gridState,
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
-                        .background(Color(0xFF1A1A1A)),
+                        .background(SurfaceDark),
                     contentPadding = PaddingValues(12.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(uiState.products) { product ->
-                        ProductGridCard(
-                            product = product,
-                            onProductClick = onProductClick
-                        )
+                    // Official Paging 3 way to show items
+                    items(count = lazyPagingItems.itemCount) { index ->
+                        val product = lazyPagingItems[index]
+                        if (product != null) {
+                            ProductGridCard(
+                                product = product,
+                                onProductClick = onProductClick
+                            )
+                        }
                     }
 
-                    // Show a loading spinner at the bottom while fetching next page
-                    if (uiState.isLoadingMore) {
+                    // Append loading — spinner at bottom while next page loads
+                    if (lazyPagingItems.loadState.append is LoadState.Loading) {
                         item(span = { GridItemSpan(2) }) {
                             Box(
                                 modifier = Modifier
@@ -201,9 +216,31 @@ fun ProductDetailsScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 CircularProgressIndicator(
-                                    color = Color(0xFF3D5AF1),
+                                    color = Primary,
                                     modifier = Modifier.size(28.dp)
                                 )
+                            }
+                        }
+                    }
+
+                    // Append error — retry button at bottom
+                    if (lazyPagingItems.loadState.append is LoadState.Error) {
+                        item(span = { GridItemSpan(2) }) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Button(
+                                    onClick = { lazyPagingItems.retry() },
+                                    colors = ButtonDefaults.buttonColors(containerColor = Primary)
+                                ) {
+                                    Text(
+                                        text = stringResource(id=R.string.retry),
+                                        style = FilledButtonLabelText
+                                    )
+                                }
                             }
                         }
                     }
@@ -211,7 +248,7 @@ fun ProductDetailsScreen(
             }
         }
 
-        // Sort bottom sheet
+        // Sort bottom sheet — unchanged
         if (uiState.showSortSheet) {
             SortBottomSheet(
                 selectedSort = uiState.selectedSort,
@@ -236,7 +273,7 @@ fun SortBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = Color.White,
+        containerColor = Surface,
         shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
     ) {
         Column(
@@ -263,22 +300,22 @@ fun SortBottomSheet(
                 ) {
                     Text(
                         text = label,
-                        fontSize = 15.sp,
-                        fontWeight = if (selectedSort == option) FontWeight.SemiBold
-                        else FontWeight.Normal,
-                        color = Color(0xFF1A1A2E)
+                        style = SortOptionText.copy(
+                            fontWeight = if (selectedSort == option) FontWeight.SemiBold
+                            else FontWeight.Normal
+                        )
                     )
                     if (selectedSort == option) {
                         Icon(
                             imageVector = Icons.Default.CheckCircle,
-                            contentDescription = "Selected",
-                            tint = Color(0xFF3D5AF1),
+                            contentDescription = stringResource(R.string.selected),
+                            tint = Primary,
                             modifier = Modifier.size(22.dp)
                         )
                     }
                 }
                 if (option != SortOption.PRICE_LOW_HIGH) {
-                    HorizontalDivider(color = Color(0xFFEEEEEE))
+                    HorizontalDivider(color = DividerLight)
                 }
             }
 
@@ -294,12 +331,11 @@ fun SortBottomSheet(
                         .weight(1f)
                         .height(50.dp),
                     shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, Color(0xFF3D5AF1))
+                    border = BorderStroke(1.dp, Primary)
                 ) {
                     Text(
-                        text = "Reset",
-                        color = Color(0xFF3D5AF1),
-                        fontWeight = FontWeight.SemiBold
+                        text = stringResource(R.string.reset),
+                        style = OutlinedButtonLabelText
                     )
                 }
                 Button(
@@ -308,12 +344,11 @@ fun SortBottomSheet(
                         .weight(1f)
                         .height(50.dp),
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3D5AF1))
+                    colors = ButtonDefaults.buttonColors(containerColor = Primary)
                 ) {
                     Text(
-                        text = "Apply",
-                        color = Color.White,
-                        fontWeight = FontWeight.SemiBold
+                        text = stringResource(R.string.apply),
+                        style = FilledButtonLabelText
                     )
                 }
             }
@@ -332,7 +367,7 @@ private fun ProductGridCard(
             .height(285.dp)
             .clickable { onProductClick(product.id) },
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = Surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -353,9 +388,7 @@ private fun ProductGridCard(
             ) {
                 Text(
                     text = product.title,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFF1A1A2E),
+                    style = ProductTitleText,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.height(38.dp)
@@ -363,9 +396,7 @@ private fun ProductGridCard(
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
                     text = "Rp. ${formatPrice(product.price)}",
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFFE53935)
+                    style = PriceLabel
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Row(
@@ -377,27 +408,24 @@ private fun ProductGridCard(
                         Icon(
                             imageVector = Icons.Default.Star,
                             contentDescription = null,
-                            tint = Color(0xFFFFC107),
+                            tint = StarColor,
                             modifier = Modifier.size(14.dp)
                         )
                         Spacer(modifier = Modifier.width(3.dp))
                         Text(
                             text = "${product.rating}",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = Color(0xFF1A1A2E)
+                            style = RatingCountText
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = "${product.reviews.size} Reviews",
-                            fontSize = 11.sp,
-                            color = Color.Gray
+                            style = ReviewCountText
                         )
                     }
                     Icon(
                         imageVector = Icons.Default.MoreVert,
                         contentDescription = stringResource(R.string.more),
-                        tint = Color.Gray,
+                        tint = TextSecondary,
                         modifier = Modifier.size(18.dp)
                     )
                 }

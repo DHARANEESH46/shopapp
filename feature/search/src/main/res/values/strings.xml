@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_products">Search products...</string>
+    <string name="back">Back</string>
+    <string name="there_are_no_suitable_products">There Are No Suitable Products</string>
+    <string name="please_try_using_other_keywords_to_find_the_product_name">Please try using other keywords to find\nthe product name</string>
+    <string name="search_suggestions">Search Suggestions</string>
+</resources>

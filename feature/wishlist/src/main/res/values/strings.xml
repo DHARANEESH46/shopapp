@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="my_wishlist">My Wishlist</string>
+    <string name="your_wishlist_is_empty">Your wishlist is empty</string>
+    <string name="remove">Remove</string>
+</resources>

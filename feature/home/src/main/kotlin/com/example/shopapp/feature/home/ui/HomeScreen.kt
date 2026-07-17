@@ -20,6 +20,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -30,9 +31,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -42,19 +42,34 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.example.shopapp.core.designsystem.theme.AppTitleText
+import com.example.shopapp.core.designsystem.theme.Background
+import com.example.shopapp.core.designsystem.theme.BannerCaptionText
+import com.example.shopapp.core.designsystem.theme.BannerSubtitleText
+import com.example.shopapp.core.designsystem.theme.BannerTitleText
+import com.example.shopapp.core.designsystem.theme.CategoryInitialText
+import com.example.shopapp.core.designsystem.theme.CategoryLabelText
+import com.example.shopapp.core.designsystem.theme.Error
+import com.example.shopapp.core.designsystem.theme.HomeProductTitleText
+import com.example.shopapp.core.designsystem.theme.LinkText
+import com.example.shopapp.core.designsystem.theme.Primary
+import com.example.shopapp.core.designsystem.theme.ProductPriceText
+import com.example.shopapp.core.designsystem.theme.RatingEmojiText
+import com.example.shopapp.core.designsystem.theme.RatingValueText
+import com.example.shopapp.core.designsystem.theme.SearchBarPlaceholderText
+import com.example.shopapp.core.designsystem.theme.SectionTitleText
+import com.example.shopapp.core.designsystem.theme.Surface as SurfaceColor
+import com.example.shopapp.core.designsystem.theme.TextPrimary
+import com.example.shopapp.core.designsystem.theme.TextSecondary
 import com.example.shopapp.core.domain.model.Product
 import com.example.shopapp.feature.home.R
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,6 +77,7 @@ fun HomeScreen(
     onProductClick: (Int) -> Unit,
     onSeeAllClick: () -> Unit,
     onCartClick: () -> Unit,
+    onSearchClick: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -71,10 +87,8 @@ fun HomeScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = stringResource(id=R.string.mega_mall),
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF3D5AF1),
-                        fontSize = 20.sp
+                        text = stringResource(id = R.string.mega_mall),
+                        style = AppTitleText
                     )
                 },
                 actions = {
@@ -82,7 +96,7 @@ fun HomeScreen(
                         Icon(
                             painter = painterResource(R.drawable.ic_popup_remainder),
                             contentDescription = stringResource(R.string.notifications),
-                            tint = Color(0xFF1A1A2E)
+                            tint = TextPrimary
                         )
                     }
                     BadgedBox(
@@ -96,17 +110,15 @@ fun HomeScreen(
                             Icon(
                                 imageVector = Icons.Filled.ShoppingCart,
                                 contentDescription = stringResource(R.string.cart),
-                                tint = Color(0xFF1A1A2E)
+                                tint = TextPrimary
                             )
                         }
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White
-                )
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = SurfaceColor)
             )
         },
-        containerColor = Color(0xFFF8F8F8)
+        containerColor = Background
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -116,50 +128,46 @@ fun HomeScreen(
         ) {
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Search Bar
-            OutlinedTextField(
-                value = uiState.searchQuery,
-                onValueChange = viewModel::onSearchQueryChange,
-                placeholder = {
-                    Text(
-                        text = stringResource(R.string.search_product_name),
-                        color = Color.LightGray,
-                        fontSize = 14.sp
-                    )
-                },
+            // Search Bar — clicking navigates to SearchScreen
+            Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = 16.dp)
+                    .clickable { onSearchClick() },
                 shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFF3D5AF1),
-                    unfocusedBorderColor = Color.Transparent,
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White
-                ),
-                trailingIcon = {
+                color = SurfaceColor,
+                shadowElevation = 1.dp
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_menu_search),
-                        contentDescription = stringResource(R.string.search),
-                        tint = Color(0xFF1A1A2E)
+                        imageVector = Icons.Default.Search,
+                        contentDescription = stringResource(id = R.string.search),
+                        tint = TextSecondary,
+                        modifier = Modifier.size(20.dp)
                     )
-                },
-                singleLine = true
-            )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = stringResource(R.string.search_product_name),
+                        style = SearchBarPlaceholderText
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Banner
             BannerSection()
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Categories
             CategoriesSection()
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Featured Products
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -169,15 +177,12 @@ fun HomeScreen(
             ) {
                 Text(
                     text = stringResource(R.string.featured_product),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1A1A2E)
+                    style = SectionTitleText
                 )
                 TextButton(onClick = onSeeAllClick) {
                     Text(
                         text = stringResource(R.string.see_all),
-                        color = Color(0xFF3D5AF1),
-                        fontSize = 14.sp
+                        style = LinkText
                     )
                 }
             }
@@ -192,7 +197,7 @@ fun HomeScreen(
                             .height(200.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator(color = Color(0xFF3D5AF1))
+                        CircularProgressIndicator(color = Primary)
                     }
                 }
                 uiState.errorMessage != null -> {
@@ -202,20 +207,12 @@ fun HomeScreen(
                             .height(200.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = uiState.errorMessage!!,
-                            color = Color.Red
-                        )
+                        Text(text = uiState.errorMessage!!, color = Error)
                     }
                 }
                 else -> {
-                    val products = if (uiState.searchQuery.isBlank())
-                        uiState.filteredProducts.take(6)
-                    else
-                        uiState.filteredProducts
-
                     FeaturedProductsGrid(
-                        products = products,
+                        products = uiState.filteredProducts.take(6),
                         onProductClick = onProductClick
                     )
                 }
@@ -226,6 +223,7 @@ fun HomeScreen(
     }
 }
 
+// BannerSection, CategoriesSection, CategoryItem, FeaturedProductsGrid, ProductCard
 @Composable
 fun BannerSection() {
     Box(
@@ -234,30 +232,15 @@ fun BannerSection() {
             .padding(horizontal = 16.dp)
             .height(160.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(Color(0xFF3D5AF1)),
+            .background(Primary),
         contentAlignment = Alignment.Center
     ) {
-        Column(
-            modifier = Modifier.padding(20.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.special_offer),
-                color = Color.White,
-                fontSize = 14.sp
-            )
+        Column(modifier = Modifier.padding(20.dp)) {
+            Text(text = stringResource(R.string.special_offer), style = BannerSubtitleText)
             Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = stringResource(R.string.up_to_50_off),
-                color = Color.White,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold
-            )
+            Text(text = stringResource(R.string.up_to_50_off), style = BannerTitleText)
             Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = stringResource(R.string.on_selected_products),
-                color = Color.White.copy(alpha = 0.8f),
-                fontSize = 12.sp
-            )
+            Text(text = stringResource(R.string.on_selected_products), style = BannerCaptionText)
         }
     }
 }
@@ -265,148 +248,79 @@ fun BannerSection() {
 @Composable
 fun CategoriesSection() {
     val categories = listOf("Foods", "Gift", "Fashion", "Gadget", "Computer")
-
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = stringResource(R.string.categories),
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF1A1A2E)
-        )
+        Text(text = stringResource(R.string.categories), style = SectionTitleText)
         TextButton(onClick = { }) {
-            Text(
-                text = stringResource(id=R.string.see_all),
-                color = Color(0xFF3D5AF1),
-                fontSize = 14.sp
-            )
+            Text(text = stringResource(id = R.string.see_all), style = LinkText)
         }
     }
-
     Spacer(modifier = Modifier.height(8.dp))
-
-    LazyRow(
-        contentPadding = PaddingValues(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        items(categories) { category ->
-            CategoryItem(category = category)
-        }
+    LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        items(categories) { category -> CategoryItem(category = category) }
     }
 }
 
 @Composable
 fun CategoryItem(category: String) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
-            modifier = Modifier
-                .size(60.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(Color.White)
-                .clickable { },
+            modifier = Modifier.size(60.dp).clip(RoundedCornerShape(12.dp)).background(SurfaceColor).clickable { },
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = category.first().toString(),
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF3D5AF1)
-            )
+            Text(text = category.first().toString(), style = CategoryInitialText)
         }
         Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = category,
-            fontSize = 12.sp,
-            color = Color.Gray
-        )
+        Text(text = category, style = CategoryLabelText)
     }
 }
 
 @Composable
-fun FeaturedProductsGrid(
-    products: List<Product>,
-    onProductClick: (Int) -> Unit
-) {
-    Column(
-        modifier = Modifier.padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
+fun FeaturedProductsGrid(products: List<Product>, onProductClick: (Int) -> Unit) {
+    Column(modifier = Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         products.chunked(2).forEach { rowProducts ->
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 rowProducts.forEach { product ->
-                    ProductCard(
-                        product = product,
-                        onProductClick = onProductClick,
-                        modifier = Modifier.weight(1f)
-                    )
+                    ProductCard(product = product, onProductClick = onProductClick, modifier = Modifier.weight(1f))
                 }
-                // Fill empty space if odd number
-                if (rowProducts.size == 1) {
-                    Spacer(modifier = Modifier.weight(1f))
-                }
+                if (rowProducts.size == 1) Spacer(modifier = Modifier.weight(1f))
             }
         }
     }
 }
 
 @Composable
-fun ProductCard(
-    product: Product,
-    onProductClick: (Int) -> Unit,
-    modifier: Modifier = Modifier
-) {
+fun ProductCard(product: Product, onProductClick: (Int) -> Unit, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.clickable { onProductClick(product.id) },
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = SurfaceColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
             AsyncImage(
                 model = product.thumbnail,
                 contentDescription = product.title,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp)
-                    .clip(RoundedCornerShape(8.dp)),
+                modifier = Modifier.fillMaxWidth().height(120.dp).clip(RoundedCornerShape(8.dp)),
                 contentScale = ContentScale.Crop
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = product.title,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color(0xFF1A1A2E),
+                style = HomeProductTitleText,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
             Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "$${product.price}",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFFE53935)
-            )
+            Text(text = "$${product.price}", style = ProductPriceText)
             Spacer(modifier = Modifier.height(4.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = "⭐", fontSize = 12.sp)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(text = "⭐", style = RatingEmojiText)
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = "${product.rating}",
-                    fontSize = 12.sp,
-                    color = Color.Gray
-                )
+                Text(text = "${product.rating}", style = RatingValueText)
             }
         }
     }

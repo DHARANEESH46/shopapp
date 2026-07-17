@@ -22,18 +22,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.shopapp.core.designsystem.component.ShopButton
 import com.example.shopapp.core.designsystem.component.ShopTopAppBar
 import com.example.shopapp.core.designsystem.theme.Divider
+import com.example.shopapp.core.designsystem.theme.FieldLabelText
+import com.example.shopapp.core.designsystem.theme.OtpDigitText
 import com.example.shopapp.core.designsystem.theme.Primary
-import com.example.shopapp.core.designsystem.theme.TextPrimary
-import com.example.shopapp.core.designsystem.theme.TextSecondary
+import com.example.shopapp.core.designsystem.theme.TimerText
 import com.example.shopapp.feature.resetpassword.R
 
 @Composable
@@ -83,8 +82,7 @@ fun VerificationScreen(
 
             Text(
                 text = stringResource(R.string.verification_code),
-                fontSize = 14.sp,
-                color = TextPrimary
+                style = FieldLabelText
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -97,11 +95,7 @@ fun VerificationScreen(
                         modifier = Modifier.size(width = 56.dp, height = 56.dp),
                         shape = RoundedCornerShape(12.dp),
                         singleLine = true,
-                        textStyle = TextStyle(
-                            fontSize = 18.sp,
-                            textAlign = TextAlign.Center,
-                            color = TextPrimary
-                        ),
+                        textStyle = OtpDigitText.copy(textAlign = TextAlign.Center),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = Primary,
@@ -120,8 +114,7 @@ fun VerificationScreen(
             if (uiState.secondsRemaining > 0) {
                 Text(
                     text = "${stringResource(R.string.resend_code_in)} $timeText",
-                    fontSize = 13.sp,
-                    color = TextSecondary
+                    style = TimerText
                 )
             } else {
                 TextButton(onClick = viewModel::onResendClick) {

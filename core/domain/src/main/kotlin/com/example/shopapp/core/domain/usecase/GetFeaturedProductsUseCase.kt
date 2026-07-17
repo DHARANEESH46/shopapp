@@ -1,16 +1,15 @@
 package com.example.shopapp.core.domain.usecase
 
-import androidx.paging.PagingData
 import com.example.shopapp.core.domain.model.Product
-import com.example.shopapp.core.domain.model.SortOption
+import com.example.shopapp.core.domain.model.ResultState
 import com.example.shopapp.core.domain.repository.ProductRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class GetProductsUseCase @Inject constructor(
+class GetFeaturedProductsUseCase @Inject constructor(
     private val repository: ProductRepository
 ) {
-    operator fun invoke(sortOption: SortOption = SortOption.NAME_A_Z): Flow<PagingData<Product>> {
-        return repository.getPagedProducts(sortOption)
+    operator fun invoke(): Flow<ResultState<List<Product>>> {
+        return repository.getProducts()
     }
 }

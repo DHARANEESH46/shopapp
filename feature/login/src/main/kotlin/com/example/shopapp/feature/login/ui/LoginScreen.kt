@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -25,15 +26,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.shopapp.core.designsystem.component.ShopButton
 import com.example.shopapp.core.designsystem.component.ShopTextField
+import com.example.shopapp.core.designsystem.theme.ErrorMessageText
 import com.example.shopapp.core.designsystem.theme.Primary
 import com.example.shopapp.core.designsystem.theme.TextSecondary
 import com.example.shopapp.feature.login.R
@@ -69,14 +69,14 @@ fun LoginScreen(
 
             Text(
                 text = stringResource(R.string.welcome_back_to_shop_app),
-                style = androidx.compose.material3.MaterialTheme.typography.headlineLarge
+                style = MaterialTheme.typography.headlineLarge
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = stringResource(R.string.please_enter_your_credentials_to_login),
-                style = androidx.compose.material3.MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium
             )
 
             Spacer(modifier = Modifier.height(40.dp))
@@ -120,8 +120,7 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = uiState.errorMessage!!,
-                    color = Color(0xFFE53935),
-                    fontSize = 13.sp,
+                    style = ErrorMessageText,
                     modifier = Modifier.fillMaxWidth()
                 )
             }

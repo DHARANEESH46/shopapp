@@ -3,11 +3,16 @@ package com.example.shopapp.core.data.repository
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import com.example.shopapp.core.data.paging.ProductPagingSource
 import com.example.shopapp.core.database.dao.ProductDao
 import com.example.shopapp.core.database.mapper.toDomain
 import com.example.shopapp.core.database.mapper.toEntity
 import com.example.shopapp.core.domain.model.Product
 import com.example.shopapp.core.domain.model.ResultState
+import com.example.shopapp.core.domain.model.SortOption
 import com.example.shopapp.core.domain.repository.ProductRepository
 import com.example.shopapp.core.network.api.ShopApi
 import com.example.shopapp.core.network.mapper.toDomain
@@ -30,23 +35,38 @@ class ProductRepositoryImpl @Inject constructor(
         return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 
-    override fun getProducts(
-        limit: Int,
-        skip: Int,
-        sortBy: String,
-        order: String
-    ): Flow<ResultState<List<Product>>> = flow {
+    override fun getProducts(): Flow<ResultState<List<Product>>> = flow {
         emit(ResultState.Loading)
-        if (!isOnline()) {
-            emit(ResultState.Error("No internet connection"))
-            return@flow
+
+        val cached = productDao.getAllProducts().first()
+        if (cached.isNotEmpty()) {
+            emit(ResultState.Success(cached.map { it.toDomain() }))
         }
-        try {
-            val response = shopApi.getProducts(limit, skip, sortBy, order)
-            emit(ResultState.Success(response.products.map { it.toDomain() }))
-        } catch (e: Exception) {
-            emit(ResultState.Error(e.message ?: "Unknown error"))
+
+        if (isOnline()) {
+            try {
+                val response = shopApi.getProducts()
+                val products = response.products.map { it.toDomain() }
+                productDao.insertProducts(products.map { it.toEntity() })
+                emit(ResultState.Success(products))
+            } catch (e: Exception) {
+                if (cached.isEmpty()) emit(ResultState.Error(e.message ?: "Unknown error"))
+            }
+        } else {
+            if (cached.isEmpty()) emit(ResultState.Error("No internet connection"))
         }
+    }
+
+    override fun getPagedProducts(sortOption: SortOption): Flow<PagingData<Product>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 10,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = {
+                ProductPagingSource(shopApi, sortOption)
+            }
+        ).flow
     }
 
     override fun getProductById(id: Int): Flow<ResultState<Product>> = flow {

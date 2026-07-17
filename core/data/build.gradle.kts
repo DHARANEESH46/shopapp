@@ -13,4 +13,5 @@ dependencies {
     implementation(project(":core:database"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
     implementation("androidx.datastore:datastore-preferences:1.1.1")
+    implementation("androidx.paging:paging-common:3.4.2")
 }

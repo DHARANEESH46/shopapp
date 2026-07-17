@@ -15,6 +15,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -25,19 +26,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.shopapp.core.designsystem.component.ShopButton
 import com.example.shopapp.core.designsystem.theme.Background
 import com.example.shopapp.core.designsystem.theme.Divider
+import com.example.shopapp.core.designsystem.theme.Placeholder
 import com.example.shopapp.core.designsystem.theme.Primary
+import com.example.shopapp.core.designsystem.theme.ProfileNameText
+import com.example.shopapp.core.designsystem.theme.Surface
 import com.example.shopapp.core.designsystem.theme.TextPrimary
 import com.example.shopapp.core.designsystem.theme.TextSecondary
+import com.example.shopapp.core.designsystem.theme.UsernameText
 import com.example.shopapp.core.domain.model.User
 import com.example.shopapp.feature.account.R
 
@@ -55,13 +57,11 @@ fun AccountScreen(
                 title = {
                     Text(
                         text = stringResource(R.string.my_account),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        color = TextPrimary
+                        style = MaterialTheme.typography.titleLarge
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White
+                    containerColor = Surface
                 )
             )
         },
@@ -83,7 +83,7 @@ fun AccountScreen(
                 modifier = Modifier
                     .size(100.dp)
                     .clip(CircleShape)
-                    .background(Color.LightGray)
+                    .background(Placeholder)
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -91,9 +91,7 @@ fun AccountScreen(
             // Full Name
             Text(
                 text = "${uiState.user?.firstName} ${uiState.user?.lastName}",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextPrimary
+                style = ProfileNameText
             )
 
             Spacer(modifier = Modifier.height(4.dp))
@@ -101,8 +99,7 @@ fun AccountScreen(
             // Username
             Text(
                 text = "@${uiState.user?.username}",
-                fontSize = 14.sp,
-                color = Primary
+                style = UsernameText
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -132,7 +129,7 @@ fun UserInfoCard(user: User) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = Surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -149,15 +146,12 @@ fun InfoRow(label: String, value: String) {
     Column {
         Text(
             text = label,
-            fontSize = 12.sp,
-            color = TextSecondary
+            style = MaterialTheme.typography.bodySmall
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = value,
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Medium,
-            color = TextPrimary
+            style = MaterialTheme.typography.titleSmall
         )
     }
 }

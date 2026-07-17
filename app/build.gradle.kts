@@ -50,6 +50,8 @@ dependencies {
     implementation(project(":feature:cart"))
     implementation(project(":feature:wishlist"))
     implementation(project(":feature:resetpassword"))
+    implementation(project(":feature:search"))
+
 
     // Core modules
     implementation(project(":core:data"))

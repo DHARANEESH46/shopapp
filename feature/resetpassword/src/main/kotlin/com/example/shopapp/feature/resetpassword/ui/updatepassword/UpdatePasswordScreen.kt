@@ -25,11 +25,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.shopapp.core.designsystem.component.ShopButton
 import com.example.shopapp.core.designsystem.component.ShopTextField
 import com.example.shopapp.core.designsystem.component.ShopTopAppBar
+import com.example.shopapp.core.designsystem.theme.PasswordHintText
 import com.example.shopapp.core.designsystem.theme.TextSecondary
 import com.example.shopapp.feature.resetpassword.R
 
@@ -106,8 +106,7 @@ fun UpdatePasswordScreen(
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = stringResource(R.string.password_hint),
-                    fontSize = 12.sp,
-                    color = TextSecondary
+                    style = PasswordHintText
                 )
             }
 
