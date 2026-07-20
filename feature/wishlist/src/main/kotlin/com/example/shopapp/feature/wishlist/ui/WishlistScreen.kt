@@ -87,7 +87,8 @@ fun WishlistScreen(
                     WishlistItemCard(
                         item = item,
                         onProductClick = onProductClick,
-                        onRemove = { viewModel.removeFromWishlist(item.productId) }
+                        onRemove = { viewModel.removeFromWishlist(item.productId) },
+                        modifier = Modifier.animateItem()
                     )
                 }
             }
@@ -99,10 +100,11 @@ fun WishlistScreen(
 fun WishlistItemCard(
     item: WishlistItem,
     onProductClick: (Int) -> Unit,
-    onRemove: () -> Unit
+    onRemove: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable { onProductClick(item.productId) },
         shape = RoundedCornerShape(12.dp),

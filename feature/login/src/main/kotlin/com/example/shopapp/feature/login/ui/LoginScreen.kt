@@ -1,5 +1,12 @@
 package com.example.shopapp.feature.login.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,6 +33,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -49,6 +57,14 @@ fun LoginScreen(
 
     val isFormFilled = uiState.username.isNotBlank() && uiState.password.isNotBlank()
 
+    val alphaAnimation = remember { Animatable(0f) }
+    LaunchedEffect(Unit) {
+        alphaAnimation.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = 600)
+        )
+    }
+
     LaunchedEffect(uiState.isLoginSuccess) {
         if (uiState.isLoginSuccess) {
             onLoginSuccess()
@@ -63,7 +79,8 @@ fun LoginScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 24.dp),
+                .padding(horizontal = 24.dp)
+                .graphicsLayer { alpha = alphaAnimation.value }
         ) {
             Spacer(modifier = Modifier.height(80.dp))
 
@@ -116,13 +133,21 @@ fun LoginScreen(
                 }
             )
 
-            if (uiState.errorMessage != null) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = uiState.errorMessage!!,
-                    style = ErrorMessageText,
-                    modifier = Modifier.fillMaxWidth()
-                )
+            AnimatedVisibility(
+                visible = uiState.errorMessage != null,
+                enter = fadeIn(animationSpec = tween(300)) +
+                        expandVertically(animationSpec = tween(300)),
+                exit = fadeOut(animationSpec = tween(300)) +
+                        shrinkVertically(animationSpec = tween(300))
+            ) {
+                Column {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = uiState.errorMessage ?: "",
+                        style = ErrorMessageText,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(40.dp))
@@ -133,6 +158,7 @@ fun LoginScreen(
                 enabled = isFormFilled,
                 isLoading = uiState.isLoading
             )
+
             Spacer(modifier = Modifier.height(24.dp))
 
             Row(

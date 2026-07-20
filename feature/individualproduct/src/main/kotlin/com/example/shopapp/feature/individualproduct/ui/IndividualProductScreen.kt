@@ -1,5 +1,11 @@
 package com.example.shopapp.feature.individualproduct.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -36,8 +42,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -50,9 +54,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.shopapp.core.designsystem.theme.CommentText
@@ -75,6 +81,7 @@ import com.example.shopapp.core.designsystem.theme.TextSecondary
 import com.example.shopapp.core.domain.model.Product
 import com.example.shopapp.core.domain.model.Review
 import com.example.shopapp.feature.individualproduct.R
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,19 +91,17 @@ fun IndividualProductScreen(
     viewModel: IndividualProductViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-
     var showCartDialog by remember { mutableStateOf(false) }
-    val snackbarHostState = remember { SnackbarHostState() }
 
+    // Auto-dismiss snackbar after 2 seconds
     LaunchedEffect(uiState.snackbarMessage) {
-        uiState.snackbarMessage?.let {
-            snackbarHostState.showSnackbar(it)
+        if (uiState.snackbarMessage != null) {
+            delay(2000)
             viewModel.clearSnackbar()
         }
     }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
@@ -147,9 +152,7 @@ fun IndividualProductScreen(
                         }
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Surface
-                )
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Surface)
             )
         },
         containerColor = Surface,
@@ -175,8 +178,9 @@ fun IndividualProductScreen(
                         border = BorderStroke(1.dp, Secondary)
                     ) {
                         Icon(
-                            imageVector = if (uiState.isInWishlist) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                            contentDescription = stringResource(id=R.string.wishlist),
+                            imageVector = if (uiState.isInWishlist) Icons.Filled.Favorite
+                            else Icons.Filled.FavoriteBorder,
+                            contentDescription = stringResource(id = R.string.wishlist),
                             tint = if (uiState.isInWishlist) OnSecondary else Secondary,
                             modifier = Modifier.size(18.dp)
                         )
@@ -194,9 +198,7 @@ fun IndividualProductScreen(
                             .weight(1f)
                             .height(50.dp),
                         shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Primary
-                        )
+                        colors = ButtonDefaults.buttonColors(containerColor = Primary)
                     ) {
                         Icon(
                             imageVector = Icons.Filled.ShoppingCart,
@@ -227,41 +229,79 @@ fun IndividualProductScreen(
             }
         }
     ) { paddingValues ->
-        when {
-            uiState.isLoading -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = Primary)
+        Box(modifier = Modifier.fillMaxSize()) {
+
+            when {
+                uiState.isLoading -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = Primary)
+                    }
+                }
+
+                uiState.errorMessage != null -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = uiState.errorMessage ?: "",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Error
+                        )
+                    }
+                }
+
+                uiState.product != null -> {
+                    val product = uiState.product
+                    if (product != null) {
+                        IndividualProductContent(
+                            product = product,
+                            modifier = Modifier.padding(paddingValues)
+                        )
+                    }
                 }
             }
 
-            uiState.errorMessage != null -> {
-                val errorMessage = uiState.errorMessage
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentAlignment = Alignment.Center
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(bottom = 16.dp),
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                AnimatedVisibility(
+                    visible = uiState.snackbarMessage != null,
+                    enter = slideInVertically(
+                        initialOffsetY = { fullHeight -> fullHeight },
+                        animationSpec = tween(400)
+                    ) + fadeIn(animationSpec = tween(400)),
+                    exit = slideOutVertically(
+                        targetOffsetY = { fullHeight -> fullHeight },
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(300))
                 ) {
-                    Text(
-                        text = errorMessage ?: "",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Error
-                    )
-                }
-            }
-
-            uiState.product != null -> {
-                val product = uiState.product
-                if (product != null) {
-                    IndividualProductContent(
-                        product = product,
-                        modifier = Modifier.padding(paddingValues)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .background(
+                                color = Color(0xFF323232),
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .padding(horizontal = 16.dp, vertical = 12.dp)
+                    ) {
+                        Text(
+                            text = uiState.snackbarMessage ?: "",
+                            color = Color.White,
+                            fontSize = 14.sp
+                        )
+                    }
                 }
             }
         }
@@ -302,7 +342,6 @@ fun AddToCartDialog(
         },
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
-
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -329,13 +368,11 @@ fun AddToCartDialog(
                                 )
                             }
                         }
-
                         Text(
                             text = "$quantity",
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.padding(horizontal = 16.dp)
                         )
-
                         Box(
                             modifier = Modifier
                                 .size(32.dp)
@@ -376,9 +413,7 @@ fun AddToCartDialog(
                         .fillMaxWidth()
                         .height(50.dp),
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Primary
-                    )
+                    colors = ButtonDefaults.buttonColors(containerColor = Primary)
                 ) {
                     Text(
                         text = stringResource(id = R.string.add_to_cart),
@@ -413,7 +448,6 @@ private fun IndividualProductContent(
         )
 
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
@@ -439,10 +473,7 @@ private fun IndividualProductContent(
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = "${product.rating}",
-                    style = RatingText
-                )
+                Text(text = "${product.rating}", style = RatingText)
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = "${product.reviews.size} Reviews",
@@ -458,9 +489,7 @@ private fun IndividualProductContent(
                 text = stringResource(R.string.description_product),
                 style = MaterialTheme.typography.titleMedium
             )
-
             Spacer(modifier = Modifier.height(10.dp))
-
             Text(
                 text = product.description,
                 style = MaterialTheme.typography.bodyMedium
@@ -487,10 +516,7 @@ private fun IndividualProductContent(
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "${product.rating}",
-                        style = RatingText
-                    )
+                    Text(text = "${product.rating}", style = RatingText)
                 }
             }
 

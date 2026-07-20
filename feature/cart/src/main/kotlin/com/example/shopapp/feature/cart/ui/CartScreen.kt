@@ -81,9 +81,7 @@ fun CartScreen(
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Surface
-                )
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Surface)
             )
         },
         containerColor = Background,
@@ -146,7 +144,8 @@ fun CartScreen(
                 ) { item ->
                     CartItemCard(
                         item = item,
-                        onRemove = { viewModel.removeFromCart(item.productId) }
+                        onRemove = { viewModel.removeFromCart(item.productId) },
+                        modifier = Modifier.animateItem()
                     )
                 }
             }
@@ -157,10 +156,12 @@ fun CartScreen(
 @Composable
 fun CartItemCard(
     item: CartItem,
-    onRemove: () -> Unit
+    onRemove: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -187,8 +188,6 @@ fun CartItemCard(
                     maxLines = 2
                 )
                 Spacer(modifier = Modifier.height(6.dp))
-
-                // Quantity shown clearly
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = stringResource(R.string.qty),
@@ -200,7 +199,6 @@ fun CartItemCard(
                         style = QuantityValueText
                     )
                 }
-
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "Rp ${formatPrice(item.productPrice)} × ${item.quantity}",

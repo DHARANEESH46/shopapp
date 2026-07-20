@@ -1,5 +1,9 @@
 package com.example.shopapp.navigation
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -56,11 +60,9 @@ object Routes {
     const val RESET_PASSWORD = "reset_password"
     const val VERIFICATION = "verification/{contact}"
     const val UPDATE_PASSWORD = "update_password"
-
     const val SEARCH = "search"
 
     fun verification(contact: String) = "verification/$contact"
-
     fun individualProduct(productId: Int) = "individual_product/$productId"
 }
 
@@ -106,7 +108,31 @@ fun ShopNavGraph(
         NavHost(
             navController = navController,
             startDestination = startDestination,
-            modifier = Modifier.padding(bottom = paddingValues.calculateBottomPadding())
+            modifier = Modifier.padding(bottom = paddingValues.calculateBottomPadding()),
+            enterTransition = {
+                slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Start,
+                    animationSpec = tween(300, easing = EaseIn)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Start,
+                    animationSpec = tween(300, easing = EaseOut)
+                )
+            },
+            popEnterTransition = {
+                slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.End,
+                    animationSpec = tween(300, easing = EaseIn)
+                )
+            },
+            popExitTransition = {
+                slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.End,
+                    animationSpec = tween(300, easing = EaseOut)
+                )
+            }
         ) {
             composable(route = Routes.LOGIN) {
                 LoginScreen(
@@ -132,7 +158,7 @@ fun ShopNavGraph(
                     onCartClick = {
                         navController.navigate(Routes.CART)
                     },
-                    onSearchClick = {                          // ← add this
+                    onSearchClick = {
                         navController.navigate(Routes.SEARCH)
                     }
                 )
@@ -154,6 +180,7 @@ fun ShopNavGraph(
                     }
                 )
             }
+
             composable(route = Routes.ORDER) {
                 PlaceholderScreen(title = "Orders")
             }
